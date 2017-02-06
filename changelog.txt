@@ -1,0 +1,22 @@
+CHANGELOG 2017 onwards
+
+2017-02-06	2.5
+- Emphasize that TotalMiles always means miles not kilometres
+- Show rides by RideType
+- Certificate printing for most rides
+- Restrict new rides to preset RideTypes
+- Add Citation field to mileeaters
+- Rides record linked by RideTypeID
+- DBExport escapes text fields
+- User logon no longer recorded in history
+
+2017-01-04	2.4
+- New [Rides] report listing rides not included on RoH unless Failed=Y
+- Amended [Rides] report "Waiting for payment" to include rides where payment not yet asked for
+- Amended [Rides] report "Not yet verified" to exclude redundant column 'Failed'
+- Identified new ride status "Omitted from RoH" for otherwise good rides
+- Updated published RoH to show RideStars automatically
+- Enhanced spacing on ride [Payment] tab
+- Entering [Date payment received] autosets [Date certificate sent] and [Show on RoH]
+- Added cache override for ibauk.css & ibauk.js
+- Implemented automatic Mile Eater publishing

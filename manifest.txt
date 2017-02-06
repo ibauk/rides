@@ -1,0 +1,39 @@
+IBAUK application manifest
+
+Main application
+----------------
+bikes.php
+certificate.php
+controlp.php
+db.conf.php
+dbcheck.php
+dbexport.php
+general.conf.php
+ibauk.css
+ibauk.js
+ibauklogo.png
+index.php
+login.php
+menuscript.js
+menustyles.css
+PasswordHash.php
+persist.php
+rallies.php
+ridelists.php
+ridenames.php
+riderecs.php
+riders.php
+ridestart.php
+search.php
+users.php
+
+Embedded public feeds only
+--------------------------
+publicme.php
+publicrallyresults.php
+publicroh.php
+jquery.js
+jquery.dataTables.min.js
+public/*
+
+
