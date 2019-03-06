@@ -3,26 +3,30 @@
 /*
  * I B A U K - general.conf.php
  *
- * Copyright (c) 2017 Bob Stammers
+ * Copyright (c) 2018 Bob Stammers
  *
  */
 
 error_reporting(E_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_USER_ERROR | E_PARSE);
 
-require_once("host.conf.php");
-
-$APPLICATION_TITLE = "IBAUK Rides Database ($db_status)";
+require_once("serverstatus.php");
+$APPLICATION_TITLE = "IBAUK Rides Database ($serverstatus)";
 $PUBLIC_TITLE = "IBAUK Roll of Honour";
 
-$APPLICATION_VERSION = "2.5";
+$APPLICATION_VERSION = "2.10";
 // 2.0  01SEP16 Initial PHP release
 // 2.1	20OCT16	Live release
 // 2.2	04DEC16 Highlighting non-UK rides; defaults for non-UK rides; extra tooltips
 // 2.3	18DEC16 New Ride enhancements + Mike's buglist + history=text(5000)
 // 2.4	04JAN17 Valid rides omitted from RoH, Undelete ride rec, Cache updating
 // 2.5	06FEB17 Certificates, RideType enforcement
+// 2.6	18MAR17 Fixed password change code; rrlines - rally results feed
+// 2.7	12JUN17	Added new rally entry code
+// 2.8	23JUL17	Bulk data imports
+// 2.9	13SEP17 Download CSV on searches + rider reports
+// 2.10	14JUN18	Current/Lapsed member status + RBLR imports
 
-$APPLICATION_COPYRIGHT = "Copyright &copy; 2017 Bob Stammers";
+$APPLICATION_COPYRIGHT = "Copyright &copy; 2018 Bob Stammers on behalf of Iron Butt UK";
 
 
 
@@ -42,8 +46,7 @@ $HASH_COST_LOG2 = 8;
 // Do we require the hashes to be portable to older systems (less secure)?
 $HASH_PORTABLE = FALSE;
 // used for persistence cookie
-
-
+$SALT = 'TheQuick32';
 
 
 $HOME_COUNTRY = 'UK';
@@ -99,6 +102,7 @@ $CMDWORDS	= Array('cmd'			=>'c',
 					'riders'		=>'riders',
 					'showrider'		=>'showrider',
 					'marksent'		=>'marksent',
+					'marklapsed'	=>'marklapsed',
 					'putride'		=>'putride',
 					'newride'		=>'newride',
 					'putrider'		=>'putrider',
@@ -169,6 +173,14 @@ function Checkbox_isNotChecked($yn)
 		{return "";}
 }
 
+function OptionSelected($val,$opt)
+{
+	if ($val==$opt)
+		return " selected ";
+	else
+		return "";
+}
+
 function setGuestAccess()
 {
 	$SQL = "SELECT guestaccess,publicfields FROM sysvars WHERE recid=1";
@@ -219,7 +231,7 @@ echo("<title>$title</title>\n");
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link href="ibauk.css?v=2" rel="stylesheet" />
 <script src="ibauk.js?v=2"></script>
-<script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
+<script src="https://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
 <link rel="stylesheet" href="menustyles.css">
 <script src="menuscript.js"></script>
 
@@ -273,6 +285,7 @@ if ($_SESSION['ACCESSLEVEL'] >= $GLOBALS['ACCESSLEVEL_READONLY'] )
 		echo("<li><a href=\"index.php?c=".$CMDWORDS['riders']."&amp;ShowPillions=only\" >Pillions only</a></li> ");
 		echo("<li><a href=\"index.php?c=".$CMDWORDS['riders']."&amp;MileEaters=show\" >Mile Eaters</a></li> ");
 		echo("<li><a href=\"index.php?c=".$CMDWORDS['riders']."&amp;NonUK=only\" >Non-UK Riders/Pillions</a></li> ");
+		echo("<li><a href=\"index.php?c=".$CMDWORDS['riders']."&amp;Inactive\" >Inactive members</a></li> ");
 		echo("<li><a href=\"index.php?c=dbcheck\" >Possible duplicates</a></li> ");
 		echo("<li><a href=\"index.php?c=friders\" >Tagged records</a></li> ");
 		echo("</ul>");

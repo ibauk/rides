@@ -3,11 +3,21 @@
 /*
  * I B A U K - db.conf.php
  *
- * Copyright (c) 2017 Bob Stammers
+ * Copyright (c) 2016 Bob Stammers
  *
  */
 
-require_once("host.conf.php");
+$db_type = "mysql";
+
+$db_host = "localhost";
+$db_user = "root";
+$db_pass = "201053";
+$db_ibauk = "ibauk";
+
+//$db_host = "160.153.16.16"; //GoDaddy
+//$db_user = "ibaukrd";
+//$db_pass = "Pc$9j0%u%v";
+//$db_ibauk = "ibaukrd";
 
 $db_startup = "";
 
@@ -15,7 +25,7 @@ $error_header = "<html><head><title>Fatal error encountered</title><meta name=\"
 $error_help = "<p>Is that machine running? Is MySQL installed and generally happy? Has someone fiddled with userids or passwords?<br />If you can't work it out yourself you'll have to call a grownup, sorry about that.</p></body></html>";
 
 
-if (!isset($db_ibauk)) $db_ibauk = "ibauk";
+//if (!isset($db_ibauk)) $db_ibauk = "ibaukrd";
 
 // Use persistent connections if available
 

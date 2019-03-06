@@ -2,7 +2,7 @@
 /*
  * I B A U K - dbcheck.php
  *
- * Copyright (c) 2017 Bob Stammers
+ * Copyright (c) 2016 Bob Stammers
  *
  */
 

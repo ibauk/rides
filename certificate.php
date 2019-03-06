@@ -179,11 +179,14 @@ function rideCertificateText($URI)
 		exit;
 	}
 
+	//var_dump($rd);
+	
 	// Load from template
 	if (!is_null($rd['TemplateID']))
 		$res = fetchCertTextFromDisk($TEMPLATE_TEXT_PATH.$rd['TemplateID']);
 	else
 		$res = FALSE;
+	
 	
 	if ($res == FALSE)
 		$res = fetchCertTextFromDisk($TEMPLATE_TEXT_PATH."default.html");
@@ -191,6 +194,7 @@ function rideCertificateText($URI)
 	if (!is_null($rd['HdrImg']))
 		$res = replaceHeaderBadge($res,$rd['HdrImg']);
 	preg_match_all("/(#[\\w]+#)/",$res,$mt,PREG_SET_ORDER);
+	//var_dump($mt);
 	foreach ($mt as $fld)
 	{
 		$fldname = substr($fld[0],1,strlen($fld[0])-2);

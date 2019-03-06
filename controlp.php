@@ -1,9 +1,9 @@
 <?php
 
 /*
- * I B A U K - showhelp.php
+ * I B A U K - controlp.php
  *
- * Copyright (c) 2017 Bob Stammers
+ * Copyright (c) 2018 Bob Stammers
  *
  */
 
@@ -109,6 +109,8 @@
 	echo("</div>"); // End environment tab
 	if ($OK)
 	{
+		if (!isset($_SESSION['ShowMemberStatus']))
+			$_SESSION['ShowMemberStatus'] = 'all';
 ?>	
 <div class="tabContent" id="tab_database">
 	<form action="index.php" method="post">
@@ -116,13 +118,39 @@
 	<p>You can mark all outstanding rides as having been reported to the USA by clicking this button. Those rides will all be marked as having been reported today. <strong>This is an immediate and irreversible operation, only click the button if you're sure!</strong></p>
 	<input type="submit" title="This will act without further confirmation!" value="Mark all as sent to USA">
 	</form>
+	<hr />
+	<form action="index.php" method="get">
+	<input type="hidden" name="cmd" value="startimport">
+	<p>Import ride/rally data from a spreadsheet</p>
+	<input type="submit" title="" value="Start import">
+	</form>
+	<hr />
+	<form action="index.php" method="post">
+	<input type="hidden" name="cmd" value="marklapsed">
+	<p>You can mark members as being 'Lapsed' by setting a cutoff date for recent activity. Anyone inactive since
+	<?php
+	$dt = New DateTime();
+	$dtx = $dt->sub(new DateInterval('P3Y'));
+	$dtxy = $dtx->format('Y-m-d');
+	echo("<input type=\"date\" name=\"datelapsed\" value=\"$dtxy\">");
+	?>
+	 will be marked as lapsed when you press <input type="submit" title="" value="Mark as lapsed"</p>
+	</form>
+	
 </div>
 <div class="tabContent" id="tab_settings">
 	<form action="index.php" method="get">
 	<fieldset><legend>Show deleted records</legend>
 	<input type="radio" name="ShowDeleted" class="radio" value="Y" <?php echo(Checkbox_isChecked($_SESSION['ShowDeleted']));?>>YES</input>
 	<input type="radio" name="ShowDeleted" class="radio2" value="N" <?php echo(Checkbox_isNotChecked($_SESSION['ShowDeleted']));?>>no</input>
-	</fieldset>
+	</fieldset>	
+	<fieldset><legend>Member status</legend>
+	<select name="ShowMemberStatus">
+	<option value="all"<?php echo(OptionSelected($_SESSION['ShowMemberStatus'],'all'));?>>Show all members</option>
+	<option value="current"<?php echo(OptionSelected($_SESSION['ShowMemberStatus'],'current'));?>>Only current members</option>
+	<option value="lapsed"<?php echo(OptionSelected($_SESSION['ShowMemberStatus'],'lapsed'));?>>Only lapsed members</option>
+	</select>
+	</fieldset>	
 	<input type="submit" name="cmd" value="<?php echo($CMDWORDS['savesettings']);?>">
 	</form>
 </div> 	
