@@ -6,22 +6,29 @@
  *
  * 2017-01	Include 'Omitted from RoH' status
  */
-  function isBadLength(sObj,iLen,sMsg) {
+function isBadLength(sObj,iLen,sMsg) {
 
     if (sObj.value.length < iLen) {
       alert(sMsg)
       sObj.focus()
       return true
     }
-  }
-  function getObj(frmname,fname,fid) {
+}
+function getObj(frmname,fname,fid) {
 
     x = "res=document." + frmname + '.' + fname + '$' + fid;
     res = '';
     eval(x);
     return res;
 
-  }
+}
+
+function todaysDate()
+/* Return today's date as YYYY-MM-DD */
+{
+	var dt = new Date;
+	return dt.toISOString().substr(0,10);
+}
 
 function ValidateDate(dtObj)
 {
