@@ -1,17 +1,16 @@
 <?php
 /*
- * I B A U K - publicroh.php
+ * I B A U K - publicrr.php
  *
- * Copyright (c) 2018 Bob Stammers
+ * Copyright (c) 2017 Bob Stammers
  *
- * 2017-01	Added in RideStars handling
- * 2018-06	Present most recent first
+ * Rally results
  */
 
 require_once("general.conf.php");
 require_once("db.conf.php");
 
-$PUBLIC_RIDES_SQL  = "SELECT SQL_CALC_FOUND_ROWS DateRideStart,NameOnCertificate,IfNull(RideStars,'') As RideStars,IBA_Number,IBA_Ride,Bike,EventName FROM rides LEFT JOIN riders ON rides.riderid=riders.riderid LEFT JOIN bikes ON rides.bikeid=bikes.bikeid ";
+$PUBLIC_RIDES_SQL  = "SELECT SQL_CALC_FOUND_ROWS RallyID,FinishPosition,RallyMiles,RallyPoints,Rider_Name,IfNull(Bike,'&nbsp;') As Bike FROM rallyresults LEFT JOIN riders ON rallyresults.riderid=riders.riderid LEFT JOIN bikes ON rallyresults.bikeid=bikes.bikeid";
 
 
 ?>
@@ -45,10 +44,6 @@ $PUBLIC_RIDES_SQL  = "SELECT SQL_CALC_FOUND_ROWS DateRideStart,NameOnCertificate
 $(document).ready(function() {
 	oTable = $('#dataTable').dataTable({
 		"bJQueryUI": true,
-		"aoColumnDefs": [
-						{ "iDataSort": [ 6 ], "aTargets": [ 0 ] },
-                        { "bSearchable": false, "bVisible": false, "aTargets": [ 6 ] }
-                    ],
 		"bScrollCollapse": false,
 		"sScrollY": "475px",
 		"bAutoWidth": true,
@@ -67,19 +62,18 @@ $(document).ready(function() {
 <table  id="dataTable">
 <thead>
 <tr>
-<th style="width:12%;">Date</th>
-<th style="width:16%">Rider Name</th>
-<th style="width:8%">IBA Number</th>
-<th style="width:20%">IBA Ride</th>
-<th style="width:30%">Motorcycle</th>
-<th style="width:14%">Event</th>
-<th class="xx" style="width:0%">SDate</th>
+<th>Rally</th>
+<th>Position</th>
+<th>Rider Name</th>
+<th>Bike</th>
+<th>Miles</th>
+<th>Points</th>
 </tr>
 </thead>
 <tbody>
 <?php
 
-	$SQL = $PUBLIC_RIDES_SQL." WHERE ShowRoH='Y' AND rides.Deleted='N' ORDER BY DateRideStart DESC";
+	$SQL = $PUBLIC_RIDES_SQL;
 	//echo($SQL."<hr />");
 	$rs = sql_query($SQL);
 	while (true)
@@ -88,16 +82,12 @@ $(document).ready(function() {
 		if ($rd == false) break;
 		
 		echo("<tr>");
-		echo("<td>".colFmtDate($rd['DateRideStart'])."</td>");
-		echo("<td>".$rd['NameOnCertificate']);
-		if ($rd['RideStars'] != '')
-			echo(" (".$rd['RideStars'].")");
-		echo("</td>");
-		echo("<td>".$rd['IBA_Number']."</td>");
-		echo("<td>".$rd['IBA_Ride']."</td>");
+		echo("<td>".$rd['RallyID']."</td>");
+		echo("<td>".$rd['FinishPosition']."</td>");
+		echo("<td>".$rd['Rider_Name']."</td>");
 		echo("<td>".$rd['Bike']."</td>");
-		echo("<td>".$rd['EventName']."</td>");
-		echo("<td>".$rd['DateRideStart']."</td>");
+		echo("<td>".$rd['RallyMiles']."</td>");
+		echo("<td>".$rd['RallyPoints']."</td>");
 		echo("</tr>\n");
 		
 	}

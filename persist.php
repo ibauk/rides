@@ -7,7 +7,7 @@
  *
  */
 
-function isLoggedin()
+ function isLoggedin()
 {
 	global $SALT;
 	

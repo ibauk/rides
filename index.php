@@ -3,7 +3,7 @@
 /*
  * I B A U K - index.php
  *
- * Copyright (c) 2017 Bob Stammers
+ * Copyright (c) 2016 Bob Stammers
  *
  * 2017-01 melines = publicme.php
  */
@@ -75,6 +75,10 @@ switch (strtoupper($cmd))
 		include('ridelists.php');
 		mark_sent_to_USA();
 		exit;
+	case strtoupper($CMDWORDS['marklapsed']):
+		include('riders.php');
+		mark_as_lapsed();
+		exit;
 	case strtoupper('startride'):
 		include("ridestart.php");
 		if (showRiderlist() == TRUE)
@@ -94,6 +98,9 @@ switch (strtoupper($cmd))
 		exit;
 	case strtoupper('melines'):
 		include("publicme.php");
+		exit;
+	case strtoupper('rrlines'):
+		include("publicrr.php");
 		exit;
 	case strtoupper('ridecert'):
 		include("certificate.php");
@@ -174,6 +181,19 @@ switch (strtoupper($cmd))
         include("users.php");
 		$cmd = '';
         break;
+	case 'RBLR2017':
+		include("rblr1000.php");
+		break;
+	case 'IMPORTXLS':
+		include('importxls.php');
+		exit;
+	case 'LOADIMPORTS':
+		include('loadimports.php');
+		update_imports();
+		exit;
+	case 'STARTIMPORT':
+		include('manageimports.php');
+		exit;
     default:
 		break;
 }
