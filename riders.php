@@ -2,11 +2,13 @@
 /*
  * I B A U K - riders.php
  *
- * Copyright (c) 2017 Bob Stammers
+ * Copyright (c) 2018 Bob Stammers
  *
+ * 2017-06 - added new rally entries code
+ * 2018-01 - added CurrentMember, DateLastActive code
  */
 
-$RIDERS_SQL  = "SELECT SQL_CALC_FOUND_ROWS riders.*,IfNull(Count(URI),0) As NumRides FROM riders LEFT JOIN rides ON riders.riderid=rides.riderid #WHERE# GROUP BY riderid";
+$RIDERS_SQL  = "SELECT SQL_CALC_FOUND_ROWS riders.*,IfNull(Count(URI),0) As NumRides FROM riders LEFT JOIN rides ON riders.riderid=rides.riderid #WHERE# GROUP BY riders.riderid";
 
 function riders_table_row_header()
 {
@@ -24,6 +26,7 @@ function riders_table_row_header()
 		$res .= "<th class=\"text\">".column_anchor("Postcode","Postcode")."</th>";
 		$res .= "<th class=\"text\">".column_anchor("Phone","Phone")."</th>";
 		$res .= "<th class=\"text\">".column_anchor("Email","Email")."</th>";
+		$res .= "<th class=\"date\">".column_anchor("LastActive","DateLastActive")."</th>";
 	}
 	
     return $res;
@@ -47,6 +50,7 @@ function riders_table_row_html($ride_data)
 		$res .= "<td class=\"text\">".$ride_data['Postcode']."</td>";
 		$res .= "<td class=\"text\">".$ride_data['Phone']."</td>";
 		$res .= "<td class=\"text\">".$ride_data['Email']."</td>";
+		$res .= "<td class=\"date\">".$ride_data['DateLastActive']."</td>";
 	}
     return $res;
 }
@@ -102,7 +106,21 @@ function show_riders_table($where,$what='Riders')
 			echo("<tr ".$trspec."2\">");
         echo(riders_table_row_html($ride_data)."</tr>\n");
     }
-    echo("</table></div>");
+    echo("</table>");
+
+	if ($TotRows > mysqli_num_rows($ride))
+		show_common_paging($TotRows,$xl);
+	$cols = "Rider_Name,Rider;IBA_Number,IBA#;Count(URI),NumRides;Country,Country;Postcode,Postcode;Phone,Phone;Email,Email";
+?>
+	<form action="index.php" method="post">
+	<input type="hidden" name="cmd" value="csv">
+	<input type="hidden" name="sql" value="<?php echo(urlencode($SQL));?>">
+	<input type="hidden" name="cols" value="<?php echo(urlencode($cols));?>">
+	<input type="hidden" name="where" value="<?php echo(urlencode(''));?>">
+	<input type="submit" value="Download as .CSV">
+	<form>
+<?php
+    echo("</div>");
 	
 }
 
@@ -122,26 +140,52 @@ function show_riders_listing()
         $OFFSET = 0;
         $PAGESIZE = -1;
     }
+	//var_dump($_REQUEST);
+	$what = '';
+	if ($_SESSION['ShowMemberStatus']=='current' || $_SESSION['ShowMemberStatus']=='lapsed')
+		$what = $_SESSION['ShowMemberStatus'].' ';
+	
 	if ($_REQUEST['MileEaters']=='show')
 	{
 		$RIDERS_SQL  = "SELECT SQL_CALC_FOUND_ROWS IfNull(Count(URI),0) As NumRides,riders.* FROM riders  JOIN (SELECT riderid FROM mileeaters GROUP BY riderid) As MEList ON MEList.riderid=riders.riderid LEFT JOIN rides ON riders.riderid=rides.riderid GROUP BY riderid";
 		$where = '';
-		$what = 'Mile Eaters';
+		$what .= 'Mile Eaters';
 	}
 	else if ($_REQUEST['ShowPillions']=='only')
 	{
 		$where = "riders.IsPillion='Y' OR rides.IsPillion='Y'";
-		$what = 'Pillions';
+		$what .= 'Pillions';
 	}
 	else if ($_REQUEST['NonUK']=='only')
 	{
 		$where = "Country <> '".$HOME_COUNTRY."'";
-		$what = 'Non-'.$HOME_COUNTRY.' Riders';
+		$what .= 'Non-'.$HOME_COUNTRY.' Riders';
+	}
+	else if (isset($_REQUEST['Inactive']))
+	{
+		$days = intval($_REQUEST['Inactive']);
+		if ($days < 1)
+			$days = 1000;
+		if ($where != '') $where .= ' AND ';
+		$where .= "( DateLastActive < DATE_SUB(CURDATE(), INTERVAL $days DAY)";
+		$where .= " OR CurrentMember='N' )";
+		$what .= "Inactive ($days days) members";
+	}
+	else if (isset($_REQUEST['Current']))
+	{
+		if ($where != '') $where .= ' AND ';
+		$days = intval($_REQUEST['Current']);
+		if ($days > 0)
+			$where .= "DateLastActive >= DATE_SUB(CURDATE(), INTERVAL $days DAY) AND ";
+		$where .= " CurrentMember='Y'";
+		$what .= "Current members";
+		if ($days > 0)
+			$what .= " active within the last $days days";
 	}
 	else
 	{
 		$where = '';
-		$what = 'Riders';
+		$what .= 'Members';
 	}
 
 	$OK = ($_SESSION['ACCESSLEVEL'] >= $GLOBALS['ACCESSLEVEL_READONLY']);
@@ -150,11 +194,22 @@ function show_riders_listing()
 		if ($where != '') $where .= ' AND ';
 		$where .= " riders.Deleted='N'";
 	}
-	
+
+	if (isset($_SESSION['ShowMemberStatus']) && $_SESSION['ShowMemberStatus'] <> 'all')
+	{
+		if ($where != '') $where .= ' AND ';
+		if ($_SESSION['ShowMemberStatus']=='current')
+			$where .= "riders.CurrentMember='Y'";
+		else
+			$where .= "riders.CurrentMember='N'";
+	}
+
+	//echo("<hr>$where<hr>");
 	show_riders_table($where,$what);
     echo("</body></html>");
         
 }
+
 
 function andDeleted()
 {
@@ -233,10 +288,18 @@ function show_rider_details_content($ride_data)
 	$res .= "<input type=\"radio\" name=\"IsPillion\" class=\"radio\" $ro value=\"N\" ".Checkbox_isNotChecked($ride_data['IsPillion']).">Rider";
 	$res .= "<input type=\"radio\" name=\"IsPillion\" class=\"radio2\" $ro value=\"Y\" ".Checkbox_isChecked($ride_data['IsPillion']).">Pillion";
 	$res .= "</fieldset>";
+	
+	
 	$res .= "<fieldset><legend>Record status</legend>";
 	$res .= "<input type=\"radio\" name=\"IsDeleted\" class=\"radio\" $ro value=\"Y\" ".Checkbox_isChecked($ride_data['Deleted']).">Deleted";
 	$res .= "<input type=\"radio\" name=\"IsDeleted\" class=\"radio2\" $ro value=\"N\" ".Checkbox_isNotChecked($ride_data['Deleted']).">OK";
+	$res .= "</fieldset><br>";
+
+	$res .= "<fieldset><legend>Active member</legend>";
+	$res .= "<input type=\"radio\" name=\"IsCurrentMember\" class=\"radio\" $ro value=\"Y\" ".Checkbox_isChecked($ride_data['CurrentMember']).">Current";
+	$res .= "<input type=\"radio\" name=\"IsCurrentMember\" class=\"radio2\" $ro value=\"N\" ".Checkbox_isNotChecked($ride_data['CurrentMember']).">Lapsed";
 	$res .= "</fieldset>";
+	$res .= "<label for=\"DateLastActive\" class=\"vlabel vbottom\">Date last active</label><input title=\"Double-click to touch\" type=\"date\" id=\"DateLastActive\" name=\"DateLastActive\" class=\"vdata vbottom\" ondblclick=\"this.value=todaysDate()\" $ro value=\"".$ride_data['DateLastActive']."\" />";
 	
 	$res .= "</div><div class=\"tabContent\" id=\"tab_bikesdata\">";
 
@@ -328,7 +391,7 @@ function show_rider_details_content($ride_data)
 	$res .= "</div>"; // end tab
 
 	$res .= "<div class=\"tabContent\" id=\"tab_rallies\">";
-	$rn = sql_query("SELECT RallyID,FinishPosition,RallyMiles,RallyPoints,bikes.Bike FROM rallyresults LEFT JOIN bikes ON rallyresults.bikeid=bikes.bikeid WHERE rallyresults.riderid=".$ride_data['riderid']." ");
+	$rn = sql_query("SELECT RallyID,FinishPosition,RallyMiles,RallyPoints,bikes.Bike,recid FROM rallyresults LEFT JOIN bikes ON rallyresults.bikeid=bikes.bikeid WHERE rallyresults.riderid=".$ride_data['riderid']." ");
 	$rows = mysqli_num_rows($rn);
 	if ($rows < 1)
 		$caption = "No rallies!";
@@ -420,6 +483,17 @@ function show_rider_details_content($ride_data)
 	$res .= "<option value=\"Black\">Black</option>";
 	$res .= "</datalist>";
 	$res .= "</div>";
+	
+	
+
+	$res .= "<div class=\"tabContent\" id=\"tab_notesdata\">";
+	$res .= "<label for=\"Notes\" class=\"vlabel\"></label><textarea id=\"Notes\" name=\"Notes\" class=\"vdata filler\" maxlength=\"255\" $ro>".$ride_data['Notes']."</textarea><br />";
+	
+	$res .= "</div>";
+
+	
+	
+	
 	if ($ro == '')
 	{
 		$res .= "<input type=\"submit\" value=\"Update/save this rider record\"/>";
@@ -446,12 +520,6 @@ function show_rider_details_content($ride_data)
 		$res .= "<button onclick=\"window.history.go(-".$_SESSION['BACK2LIST'].");\">Return to the list</button>";
 	else if ($_SESSION['BACK2LIST'] < 0)
 		$res .= "<button onclick=\"window.location.replace('index.php?c=friders')\">Return to the list</button>";
-	$res .= "</div>";
-
-
-	$res .= "<div class=\"tabContent\" id=\"tab_notesdata\">";
-	$res .= "<label for=\"Notes\" class=\"vlabel\"></label><textarea id=\"Notes\" name=\"Notes\" class=\"vdata filler\" maxlength=\"255\" $ro>".$ride_data['Notes']."</textarea><br />";
-	
 	$res .= "</div>";
 
 
@@ -529,8 +597,20 @@ function showNewRider()
 	
 	$rd['URI'] = 'newrec';
 	$rd['Country'] = 'UK';
+	$rd['CurrentMember'] = 'Y';
+	$rd['DateLastActive'] = date('Y-m-d');
 	show_rider_details_content($rd);
 		
+}
+
+function fetchBikeid($riderid,$bike)
+{
+	$SQL = "SELECT bikeid FROM bikes WHERE riderid=$riderid AND bike like '".$bike."'";
+	$r = sql_query($SQL);
+	$rr = mysqli_num_rows($r);
+	if ($rr < 1) return -2;
+	$rd = mysqli_fetch_assoc($r);
+	return $rd['bikeid'];
 }
 
 function put_rider()
@@ -567,6 +647,17 @@ function put_rider()
 		}
 	}
 	
+	$Rally_max = count($_POST['Rally_recid']);
+	for ($ix = 0;$ix < $Rally_max; $ix++)
+	{
+		if ($_POST['Rally_recid'][$ix] <> 'newrec' && $_POST['FinishPosition'][$ix] == '')
+		{
+			show_infoline("Each rally entry must be non-blank","errormsg");
+			show_rider_details_uri($_POST['riderid']);
+			exit;
+		}
+	}
+	
 	//var_dump($_POST);
 	//echo("<hr />");
 	
@@ -575,7 +666,7 @@ function put_rider()
 	// Rider record
 	if ($newrec) {
 		$SQL = "INSERT INTO riders (";
-		$SQL .= "Rider_Name,IBA_Number,Postal_Address,Postcode,Phone,AltPhone,Email,IsPillion,Notes,Country";
+		$SQL .= "Rider_Name,IBA_Number,Postal_Address,Postcode,Phone,AltPhone,Email,IsPillion,Notes,Country,Deleted,CurrentMember,DateLastActive";
 		$SQL .= ") VALUES (";
 		$SQL .= "'".safesql($_POST['Rider_Name'])."'";
 		$SQL .= ",'".safesql($_POST['IBA_Number'])."'";
@@ -587,6 +678,9 @@ function put_rider()
 		$SQL .= ",'".safesql($_POST['IsPillion'])."'";
 		$SQL .= ",'".safesql($_POST['Notes'])."'";
 		$SQL .= ",'".safesql($_POST['Country'])."'";
+		$SQL .= ",'".safesql($_POST['IsDeleted'])."'";
+		$SQL .= ",'".safesql($_POST['IsCurrentMember'])."'";
+		$SQL .= ",".safedatesql($_POST['DateLastActive'])."";
 		$SQL .= ")";
 	} elseif (isset($_POST['deletethisrec'])) {
 		$SQL = "UPDATE riders SET Deleted='Y' WHERE riderid=".$_POST['riderid'];
@@ -603,6 +697,8 @@ function put_rider()
 		$SQL .= ",Notes='".safesql($_POST['Notes'])."'";
 		$SQL .= ",Country='".safesql($_POST['Country'])."'";
 		$SQL .= ",Deleted='".safesql($_POST['IsDeleted'])."'";
+		$SQL .= ",CurrentMember='".safesql($_POST['IsCurrentMember'])."'";
+		$SQL .= ",DateLastActive=".safedatesql($_POST['DateLastActive'])."";
 		$SQL .= " WHERE riderid=".$_POST['riderid'];
 	}
 
@@ -614,14 +710,17 @@ function put_rider()
 	// Bikes array
 	for ($ix = 0;$ix < $bmax; $ix++)
 	{
-		$KmsOdo = "KmsOdo:".$ix;
+		$KmsOdo = "KmsOdo:".($ix+1);
+		$kmsodoval = $_POST[$KmsOdo][0];
+		//echo("$KmsOdo==$kmsodoval<hr />");
 		if ($_POST['bikeid'][$ix] <> 'newrec')
 		{
 			$SQL = "UPDATE bikes SET ";
 			$SQL .= "Bike='".safesql($_POST['Bike'][$ix])."'";
 			$SQL .= ",Registration='".safesql($_POST['Registration'][$ix])."'";
-			$SQL .= ",KmsOdo='".safesql($_POST[$kmsOdo][0])."'";
+			$SQL .= ",KmsOdo='".safesql($kmsodoval)."'";
 			$SQL .= " WHERE riderid=".$_POST['riderid']." AND bikeid=".$_POST['bikeid'][$ix];
+			//echo("$SQL<hr />");
 			sql_query($SQL);
 		}
 		elseif ($_POST['Bike'][$ix] <> '')
@@ -664,8 +763,67 @@ function put_rider()
 		}		
 	}
 	
+	// Rally array
+	for ($ix = 0;$ix < $Rally_max; $ix++)
+	{
+		$bikeid = -1;
+		while($bikeid < 0)
+		{
+			$bikename = $_POST['Rally_Bike'][$ix];
+			if ($bikename == '') break;
+			$bikeid = fetchBikeid($_POST['riderid'],$bikename);
+			if ($bikeid < 0 && $bikename <> '')
+			{
+				$SQL = "INSERT INTO bikes (riderid,bike) VALUES(".$_POST['riderid'].",'".safesql($_POST['Rally_Bike'][$ix])."')";
+				sql_query($SQL);
+			}				
+		}
+
+		if ($_POST['Rally_recid'][$ix] <> 'newrec')
+		{
+			$SQL = "UPDATE rallyresults SET ";
+			$SQL .= "RallyID='".safesql($_POST['RallyID'][$ix])."'";
+			$SQL .= ",FinishPosition=".safesql($_POST['FinishPosition'][$ix])."";
+			if ($_POST['Rally_Bike'][$ix] <> '')
+				$SQL .= ",bikeid=".$bikeid;
+			$SQL .= ",RallyMiles=".safesql($_POST['RallyMiles'][$ix])."";
+			$SQL .= ",RallyPoints=".safesql($_POST['RallyPoints'][$ix])."";
+			$SQL .= " WHERE riderid=".$_POST['riderid']." AND recid=".$_POST['Rally_recid'][$ix];
+			//echo("$ix == $SQL<hr />");
+			sql_query($SQL);
+		}
+		else if ($_POST['FinishPosition'][$ix] <> '')
+		{
+			//echo("Hello sailor<hr />");
+			$SQL = "INSERT INTO rallyresults (RallyID,FinishPosition,riderid,bikeid,RallyMiles,RallyPoints,Country) VALUES (";
+			$SQL .= "'".safesql($_POST['RallyID'][$ix])."'";
+			$SQL .= ",".safesql($_POST['FinishPosition'][$ix])."";
+			$SQL .= ",".$_POST['riderid'];
+			$SQL .= ",".$bikeid;
+			$SQL .= ",".safesql($_POST['RallyMiles'][$ix])."";
+			$SQL .= ",".safesql($_POST['RallyPoints'][$ix])."";
+			$SQL .= ",'".safesql($_POST['Country'][$ix])."'";
+			$SQL .= ")";
+			//echo("$SQL<hr />");
+			sql_query($SQL);
+		}		
+	}
+	
+
 	show_infoline("Rider record saved ok","infohilite");
 	show_rider_details_uri($_POST["riderid"]);
+}
+
+function mark_as_lapsed()
+{
+	
+	$OK = ($_SESSION['ACCESSLEVEL'] >= $GLOBALS['ACCESSLEVEL_UPDATE']);
+	if (!$OK) safe_default_action();
+
+	$sql = "UPDATE riders SET CurrentMember='N' WHERE CurrentMember='Y' AND DateLastActive<'".$_REQUEST['datelapsed']."';";
+	sql_query($sql);
+	show_infoline('Riders inactive since '.$_REQUEST['datelapsed'].' have been marked as Lapsed','infohilite');
+	show_riders_listing();
 }
 
 ?>

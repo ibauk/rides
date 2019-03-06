@@ -5,9 +5,10 @@
  * Copyright (c) 2017 Bob Stammers
  *
  * 2017-01	Set Deleted=N as appropriate
+ * 2017-09	Fixed rides.Kmsodo + wrong bike updating
  */
 
-$RIDES_SQL  = "SELECT SQL_CALC_FOUND_ROWS *, rides.Deleted as RideDeleted FROM rides LEFT JOIN riders ON rides.riderid=riders.riderid LEFT JOIN bikes ON rides.bikeid=bikes.bikeid ";
+$RIDES_SQL  = "SELECT SQL_CALC_FOUND_ROWS *, rides.Deleted as RideDeleted, rides.IsPillion as PillionRide, rides.KmsOdo as KmsOdo FROM rides LEFT JOIN riders ON rides.riderid=riders.riderid LEFT JOIN bikes ON rides.bikeid=bikes.bikeid ";
 
 
 
@@ -112,8 +113,8 @@ function show_ride_details_content($ride_data)
 	$res .= "<label for=\"DateRideFinish\" class=\"vlabel\">Date ride finished</label><input type=\"date\" id=\"DateRideFinish\" name=\"DateRideFinish\" class=\"vdata\" $ro value=\"".$ride_data['DateRideFinish']."\" /><br>";
 	$res .= "<label for=\"EventName\" class=\"vlabel\">Event</label><input type=\"text\" name=\"EventName\" id=\"EventName\" class=\"vdata\" $ro value=\"".$ride_data['EventName']."\" />";
 	$res .= "<fieldset>";
-	$res .= "<input type=\"radio\" name=\"IsPillion\" class=\"radio\" $disabled value=\"N\" ".Checkbox_isNotChecked($ride_data['IsPillion']).">Rider";
-	$res .= "<input type=\"radio\" name=\"IsPillion\" class=\"radio2\" $disabled value=\"Y\" ".Checkbox_isChecked($ride_data['IsPillion']).">Pillion";
+	$res .= "<input type=\"radio\" name=\"IsPillion\" class=\"radio\" $disabled value=\"N\" ".Checkbox_isNotChecked($ride_data['PillionRide']).">Rider";
+	$res .= "<input type=\"radio\" name=\"IsPillion\" class=\"radio2\" $disabled value=\"Y\" ".Checkbox_isChecked($ride_data['PillionRide']).">Pillion";
 	$res .= "</fieldset>";
 	$res .= "<hr />";
 	$res .= "<label for=\"BikeChoice\" class=\"vlabel bold\">Bike</label>";
@@ -310,6 +311,7 @@ function showNewRide()
 		$rd['DateRcvd'] = date('Y-m-d');
 		$rd['OriginUK'] = 'Y';
 		$rd['PayMethod'] = ''; // Setting default hides options
+		$rd['IBA_Ride'] = 'SS1000';
 
 		show_ride_details_content($rd);
 		
@@ -441,12 +443,14 @@ function putRide()
 	}
 	else
 	{
+		// Don't update bike details here, this screws things up and is unnecessary
+		
 		//var_dump($_POST);
-		$SQL = "UPDATE bikes SET ";
-		$SQL .= "KmsOdo='".$_POST['KmsOdo']."'";
-		$SQL .= ",Bike='".safesql($_POST['Bike'])."'";
-		$SQL .= ",Registration='".safesql($_POST['Registration'])."'";
-		$SQL .= " WHERE riderid=".$_POST['riderid']." AND bikeid=".$_POST['bikeid'];
+		//$SQL = "UPDATE bikes SET ";
+		//$SQL .= "KmsOdo='".$_POST['KmsOdo']."'";
+		//$SQL .= ",Bike='".safesql($_POST['Bike'])."'";
+		//$SQL .= ",Registration='".safesql($_POST['Registration'])."'";
+		//$SQL .= " WHERE riderid=".$_POST['riderid']." AND bikeid=".$_POST['bikeid'];
 		//sql_query($SQL);
 	}
 	//var_dump($_POST);
@@ -501,6 +505,7 @@ function putRide()
 	} elseif ($_POST['RideDeleted']=='Y') {
 		$SQL = "UPDATE rides SET Deleted='Y' WHERE URI=".$_POST[$CMDWORDS['uri']];
 	} else {
+		//var_dump($_POST);
 		$SQL = "UPDATE rides SET ";
 		$SQL .= "DateRideStart=".safedatesql($_POST['DateRideStart']);
 		$SQL .= ",DateRideFinish=".safedatesql($_POST['DateRideFinish']);

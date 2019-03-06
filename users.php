@@ -2,7 +2,7 @@
 /*
  * I B A U K - users.php
  *
- * Copyright (c) 2017 Bob Stammers
+ * Copyright (c) 2016 Bob Stammers
  *
  */
 
@@ -104,12 +104,15 @@ function update_users()
                 echo("<span class=\"errordata\"$id</span></p>");
                 exit();
             }
-            if ( ($_POST['oldpassword$'.$id] == $usr['userpass']) or
+
+			$hasher = new PasswordHash($HASH_COST_LOG2, $HASH_PORTABLE);
+			
+            if ( ($hasher->CheckPassword($_POST['oldpassword$'.$id],$usr['userpass'])) or
                  ($_SESSION['ACCESSLEVEL'] > $usr['accesslevel']) )
             {
                 // ok
                 $SQL  = "UPDATE users SET ";
-                $SQL .= "userpass = '".$_POST['password1$'.$id]."'";
+                $SQL .= "userpass = '".$hasher->HashPassword($_POST['password1$'.$id])."'";
                 $SQL .= ",accesslevel = ".$_POST['accesslevel$'.$id];
                 $SQL .= " WHERE userid = '$id'";
                 sql_query($SQL);
@@ -121,6 +124,7 @@ function update_users()
                 echo("<p class=\"errormsg\">Your password change failed to authenticate</p>");
                 exit();
             }
+			unset($hasher);
         }
 		else if ($_POST['accesslevel$'.$id] != $_POST['oldaccesslevel$'.$id])
 		{

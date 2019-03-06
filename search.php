@@ -2,7 +2,7 @@
 /*
  * I B A U K - search.php
  *
- * Copyright (c) 2017 Bob Stammers
+ * Copyright (c) 2016 Bob Stammers
  *
  */
 
@@ -10,13 +10,28 @@
 // Fail quietly if called directly
 if (!function_exists('start_html')) exit;
 
-$SEARCH_SQL = "SELECT SQL_CALC_FOUND_ROWS ";
-$SEARCH_SQL .= "riders.riderid As riderid,Rider_Name,IBA_Number,Postal_Address,Postcode,Email,Phone,AltPhone ";
-$SEARCH_SQL .= ",URI,DateRideStart,NameOnCertificate,EventName,StartPoint,FinishPoint,MidPoints,IBA_Ride,OriginUK,Bike ";
-$SEARCH_SQL .= "FROM riders LEFT JOIN rides ON rides.riderid=riders.riderid LEFT JOIN bikes ON rides.bikeid=bikes.bikeid WHERE ";
 
 $WHEREKEY = '';
 
+function buildSearchSQL($ResultsAsRides)
+{
+	$SEARCH_SQL = "SELECT SQL_CALC_FOUND_ROWS ";
+	
+	
+	if ($ResultsAsRides)
+		$SEARCH_SQL .= "URI,DateRideStart,NameOnCertificate,EventName,StartPoint,FinishPoint,MidPoints,IBA_Ride,OriginUK,Bike, ";
+	else
+		$SEARCH_SQL .= "riders.riderid As riderid, count(rides.URI) as NumRides, ";
+	$SEARCH_SQL .= "Rider_Name,IBA_Number,Postal_Address,Postcode,Country,Email,Phone,AltPhone ";
+	if ($ResultsAsRides)
+		$SEARCH_SQL .= "FROM rides LEFT JOIN riders ON rides.riderid=riders.riderid ";
+	else
+		$SEARCH_SQL .= "FROM riders LEFT JOIN rides ON rides.riderid=riders.riderid ";
+	$SEARCH_SQL .= "LEFT JOIN bikes ON rides.bikeid=bikes.bikeid ";
+
+	
+	return $SEARCH_SQL;
+}
 function orRideDate($datestr)
 {
 	/*
@@ -51,7 +66,7 @@ function orRideDate($datestr)
 function searchall($FIND,$ORDER,$DESC)
 {
 	
-	global $SEARCH_SQL,$WHEREKEY, $OFFSET, $PAGESIZE, $KEY_ORDER, $KEY_DESC;
+	global $WHEREKEY, $OFFSET, $PAGESIZE, $KEY_ORDER, $KEY_DESC;
 
 
 	$OK = ($_SESSION['ACCESSLEVEL'] >= $GLOBALS['ACCESSLEVEL_READONLY']);
@@ -124,7 +139,9 @@ function searchall($FIND,$ORDER,$DESC)
 	$WHEREKEY = $SQL;
 	if (trim($WHEREKEY) == '') $WHEREKEY = ' true ';
 
-	$SQL  = $SEARCH_SQL.$WHEREKEY;
+	$SQL  = buildSearchSQL(!$RETURN_RIDERLIST)." WHERE ".$WHEREKEY;
+	// The GROUP BY statements were amended to include the second field in v2.8, Sept 2017
+	// in response to MySQL 5.7.19 objecting to those fields being SELECTed otherwise.
 	if ($RETURN_RIDERLIST)
 	{
 		$SQL .= " GROUP BY riders.riderid ";
@@ -142,6 +159,11 @@ function searchall($FIND,$ORDER,$DESC)
     if ($_REQUEST['debug']=='sql')
 		echo("<hr />$SQL<hr />");
 	$res = sql_query($SQL);
+    if ($_REQUEST['debug']=='sql')
+	{
+		print_r($res);
+		echo('<hr>');
+	}
 	return $res;
 
 }
@@ -170,13 +192,13 @@ function search_results_row($ride_data,$showrides)
 		{
 			$SQL = "SELECT Count(*) AS Rex FROM rides WHERE rides.riderid=".$ride_data['riderid'];
 			if ($_SESSION['ShowDeleted'] <> 'Y')
-				$SQL .= " AND rides.Deleted='N'";
+				$SQL .= " AND (rides.Deleted='N' OR rides.Deleted is null)";
 			$rr = sql_query($SQL);
 			$rrd = mysqli_fetch_assoc($rr);
 		}
 		else
 			$rrd['Rex'] = '';
-		$res .= "<td class=\"number\">".$rrd['Rex']."</td>";
+		$res .= "<td class=\"number\">".$ride_data['NumRides']."</td>";
 		$res .= "<td class=\"text\">".$ride_data['Country']."</td>";
 		$res .= "<td class=\"text\">".$ride_data['Postcode']."</td>";
 		$res .= "<td class=\"text\">".$ride_data['Phone']."</td>";
@@ -188,18 +210,26 @@ function search_results_row($ride_data,$showrides)
 
 function show_search_results($where)
 {
-    global $SEARCH_SQL, $_KEY_ORDER, $KEY_DESC, $OFFSET, $PAGESIZE, $CMDWORDS, $KEY_FIND;
+    global $_KEY_ORDER, $KEY_DESC, $OFFSET, $PAGESIZE, $CMDWORDS, $KEY_FIND;
 
-    $SQL = $SEARCH_SQL;
-    if ($where <> '') 
-		$SQL .= $where;
+    $SearchSQL = buildSearchSQL($_REQUEST['parShowResults']=='rides');
+	$SQL = $SearchSQL;
+    
+	if ($where <> '') 
+		$SearchWhere .= $where;
 	else
-		$SQL .= 'true';
+		$SearchWhere .= 'true';
 
+	$SQL .= " WHERE ".$SearchWhere;
+	
+	//echo('<hr>'.$SearchSQL.'<hr>'.$SearchWhere.'<hr>');
+	
 	if (!isset($_REQUEST['parShowResults']) || $_REQUEST['parShowResults']!='rides')
-		$SQL .= " GROUP BY riders.riderid ";
+		$SearchGroup = " GROUP BY riders.riderid ";
 	else
-		$SQL .= " GROUP BY URI ";
+		$SearchGroup = " GROUP BY URI ";
+	$SQL .= $SearchGroup;
+	$SearchWhere .= " ".$SearchGroup;
 	$SQL .= sql_order();
 	//echo($SQL.'<hr />');
     $ride = sql_query($SQL);
@@ -219,6 +249,7 @@ function show_search_results($where)
 		echo("<th>".column_anchor('Bike','Bike')."</th>");
 		echo("<th>".column_anchor('Event','EventName')."</th>");
 		echo("</tr>"); // Matches RoH
+		$SearchCols = "DateRideStart,NameOnCertificate,IBA_Number,IBA_Ride,Bike,EventName";
 	}
 	else
 	{
@@ -229,6 +260,7 @@ function show_search_results($where)
 		echo("<th>".column_anchor('Country','Country')."</th>");
 		echo("<th>".column_anchor('Postcode','Postcode')."</th>");
 		echo("<th>Phone</th><th>Email</th></tr>\n");
+		$SearchCols = "Rider_Name,IBA_Number,Country,Postcode,Email";
 	}
 	
 	$rownum = 0;
@@ -279,6 +311,16 @@ function show_search_results($where)
 	echo("</table>");
 	if ($TotRows > mysqli_num_rows($ride))
 		show_common_paging($TotRows,$xl);
+	// echo("<p>".$SearchSQL."</p>");
+?>
+	<form action="index.php" method="post">
+	<input type="hidden" name="cmd" value="csv">
+	<input type="hidden" name="sql" value="<?php echo(urlencode($SearchSQL));?>">
+	<input type="hidden" name="cols" value="<?php echo(urlencode($SearchCols));?>">
+	<input type="hidden" name="where" value="<?php echo(urlencode($SearchWhere));?>">
+	<input type="submit" value="Download as .CSV">
+	<form>
+<?php
     echo("</div>");
 	
 }

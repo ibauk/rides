@@ -2,7 +2,7 @@
 /*
  * I B A U K - ridenames.php
  *
- * Copyright (c) 2017 Bob Stammers
+ * Copyright (c) 2016 Bob Stammers
  *
  */
 
@@ -40,7 +40,7 @@ function ridenames_table_row_html($rd)
 			$res .= "<input type=\"hidden\" name=\"cmd\" value=\"".$CMDWORDS['editridetype']."\" />";
 			$res .= "<input type=\"hidden\" name=\"".$CMDWORDS['uri']."\" value=\"".$rd['recid']."\" />";
 	}
-    $res .= "<input class=\"long\" type=\"text\" readonly value=\"".$rd['IBA_Ride']."\" />";
+    $res .= "<input class=\"long\" type=\"text\" readonly value=\"".$rd['IBA_Ride']."\" />"; 
 	if ($OK)
 	{
 		if ($rd['recid'] <> 'newrec') 	{
@@ -141,7 +141,7 @@ function update_ridename()
 	$OK = ($_SESSION['ACCESSLEVEL'] >= $GLOBALS['ACCESSLEVEL_UPDATE']);
 	if (!$OK) safe_default_action();
 
-	if ($_POST[$CMDWORDS['uri']] == 'newrec' && $_POST['IBA_Ride'] <> '') {
+	if ($_POST[$CMDWORDS['uri']] == 'newrec' && $_POST['IBA_Ride'] <> '') { 
 		$SQL = "INSERT INTO ridenames (IBA_Ride) VALUES ('".safesql($_POST['IBA_Ride'])."')";
 	} else if ($_POST['deletethisrec'] == 'Y') {
 		$SQL = "DELETE FROM ridenames WHERE recid=".$_POST[$CMDWORDS['uri']];
@@ -224,7 +224,7 @@ function update_ridetype()
 	$OK = ($_SESSION['ACCESSLEVEL'] >= $GLOBALS['ACCESSLEVEL_UPDATE']);
 	if (!$OK) safe_default_action();
 
-	if ($_POST['recid'] == 'newrec' && $_POST['IBA_Ride'] <> '') {
+	if (($_POST['recid'] == 'newrec' || $_POST['recid'] == '') && $_POST['IBA_Ride'] <> '') { // or blank
 		$SQL = "INSERT INTO ridenames (IBA_Ride) VALUES ('".safesql($_POST['IBA_Ride'])."')";
 	} else if ($_POST['deletethisrec'] == 'Y') {
 		$SQL = "UPDATE ridenames SET Deleted='Y' WHERE recid=".$_POST['recid'];
