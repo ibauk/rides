@@ -2,7 +2,10 @@
 /*
  * I B A U K - importxls.php
  *
- * Copyright (c) 2018 Bob Stammers
+ * This is the SQLITE version
+ * 
+ * 
+ * Copyright (c) 2020 Bob Stammers
  *
  */
 
@@ -50,7 +53,7 @@ echo("<p>Importing data from <strong>".$IMPORTSPEC['xlsname']."</strong></p>");
 
 $sql = "SELECT Count(*) AS Rex FROM bulkimports";
 $r = sql_query($sql);
-$rr = mysqli_fetch_assoc($r);
+$rr = $r->fetchArray();
 if ($rr['Rex'] > 0) {
 	if (!isset($_REQUEST['force'])) {
 		show_infoline("The import table is not empty, please fix and retry","errormsg");

@@ -2,7 +2,10 @@
 /*
  * I B A U K - login.php
  *
- * Copyright (c) 2016 Bob Stammers
+ * This is the SQLITE version
+ * 
+ * 
+ * Copyright (c) 2020 Bob Stammers
  *
  */
 
@@ -36,21 +39,19 @@ function login_user($u,$p)
 	$cookieid = '';
 	
 	//var_dump($db_ibauk_conn);
+	error_log("Fetching details for ".$u);
+	try {
+		$r = $db_ibauk_conn->query("SELECT userpass,accesslevel,cookieid FROM users WHERE userid='".$db_ibauk_conn->escapeString($u)."'");
+	} catch(exception $e) {
+		fail("DB query",$e->getMessage());
+	}
+	error_log("Extracting details for $u");
 	
-	($stmt = mysqli_prepare($db_ibauk_conn,'SELECT userpass,accesslevel,cookieid FROM users WHERE userid=?'))
-		|| fail('MySQL prepare', mysqli_error($db_ibauk_conn));
-	
-	$stmt->bind_param('s', $u)
-		|| fail('MySQL bind_param', mysqli_error($db_ibauk_conn));
-	
-	$stmt->execute()
-		|| fail('MySQL execute', mysqli_error($db_ibauk_conn));
-	$stmt->bind_result($hash, $al, $cookieid)
-		|| fail('MySQL bind_result', mysqli_error($db_ibauk_conn));
-	if (!$stmt->fetch() && mysqli_error($db_ibauk_conn))
-		fail('MySQL fetch', mysqli_error($db_ibauk_conn));
-	
-	$stmt->close();
+	if (!$rd = $r->fetchArray()) 
+		fail('DB fetch FAILED!');
+	error_log("Setting up hasher");
+	$hash = $rd['userpass'];
+	$al = $rd['accesslevel'];
 	
 	$hasher = new PasswordHash($HASH_COST_LOG2, $HASH_PORTABLE);
 	if ($hasher->CheckPassword($p, $hash)) {
@@ -65,7 +66,7 @@ function login_user($u,$p)
 	
     $_SESSION['ACCESSLEVEL'] = $al;
     $_SESSION['USERNAME'] = $u;
-    $_SESSION['UPDATING'] = $usr['accesslevel'] >= $GLOBALS['ACCESSLEVEL_UPDATE'];
+    $_SESSION['UPDATING'] = $_SESSION['ACCESSLEVEL'] >= $GLOBALS['ACCESSLEVEL_UPDATE'];
 	
 	$cookieid = md5($SALT.$u);
 	if (isset($_POST['persist']))

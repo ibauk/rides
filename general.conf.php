@@ -3,7 +3,10 @@
 /*
  * I B A U K - general.conf.php
  *
- * Copyright (c) 2018 Bob Stammers
+ * This is the SQLITE version
+ * 
+ * 
+ * Copyright (c) 2020 Bob Stammers
  *
  */
 
@@ -13,7 +16,7 @@ require_once("serverstatus.php");
 $APPLICATION_TITLE = "IBAUK Rides Database ($serverstatus)";
 $PUBLIC_TITLE = "IBAUK Roll of Honour";
 
-$APPLICATION_VERSION = "2.10";
+$APPLICATION_VERSION = "2.11";
 // 2.0  01SEP16 Initial PHP release
 // 2.1	20OCT16	Live release
 // 2.2	04DEC16 Highlighting non-UK rides; defaults for non-UK rides; extra tooltips
@@ -25,8 +28,9 @@ $APPLICATION_VERSION = "2.10";
 // 2.8	23JUL17	Bulk data imports
 // 2.9	13SEP17 Download CSV on searches + rider reports
 // 2.10	14JUN18	Current/Lapsed member status + RBLR imports
+// 2.11 21AUG20 Recode for SQLite, Code overhaul
 
-$APPLICATION_COPYRIGHT = "Copyright &copy; 2018 Bob Stammers on behalf of Iron Butt UK";
+$APPLICATION_COPYRIGHT = "Copyright &copy; 2020 Bob Stammers on behalf of Iron Butt UK";
 
 
 
@@ -153,7 +157,10 @@ function sql_order()
 		if ($KEY_ORDER == $KEY_DESC)
 			$SQL .= ' DESC';
 	}
-	if (!$SHOWALL && $PAGESIZE > 0)
+
+
+	/* Not applicable with SQLite */
+	if (false) 	if (!$SHOWALL && $PAGESIZE > 0)
 		$SQL .= " LIMIT $OFFSET, $PAGESIZE";
 	return $SQL;	
 }
@@ -161,14 +168,14 @@ function sql_order()
 function Checkbox_isChecked($yn)
 {
 	if ($yn == "Y")
-		{return " checked=\"checked\" ";}
+		{return " checked ";}
 	else
 		{return "";}
 }
 function Checkbox_isNotChecked($yn)
 {
 	if ($yn != "Y")
-		{return " checked=\"checked\" ";}
+		{return " checked ";}
 	else
 		{return "";}
 }
@@ -185,7 +192,7 @@ function setGuestAccess()
 {
 	$SQL = "SELECT guestaccess,publicfields FROM sysvars WHERE recid=1";
 	$r = sql_query($SQL);
-	$rr = mysqli_fetch_assoc($r);
+	$rr = $r->fetchArray();
 	//var_dump($_SESSION);
 	//echo('<hr />');
 	$_SESSION['GUEST_ACCESSLEVEL'] =$rr ['guestaccess'];
@@ -229,9 +236,10 @@ echo("<title>$title</title>\n");
 ?>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<link href="ibauk.css?v=2" rel="stylesheet" />
+<link rel="stylesheet" type="text/css" href="reboot.css?ver=<?= filemtime('reboot.css')?>">
+<link href="ibauk.css?v=<?= filemtime('ibauk.css')?>" rel="stylesheet" />
 <script src="ibauk.js?v=2"></script>
-<script src="https://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
+<script src="https://code.jquery.com/jquery-latest.min.js"></script>
 <link rel="stylesheet" href="menustyles.css">
 <script src="menuscript.js"></script>
 
@@ -248,7 +256,7 @@ echo("<a title=\"v$APPLICATION_VERSION\" href=\"index.php\">".application_title(
 ?>
 <br>
 <input type="hidden" name="c" value="se">
-<input type="text" name="f" placeholder="Rider name,IBA#,etc" style="display:inline;" >
+<input type="text" name="f" placeholder="Rider name,IBA#,etc" style="display:inline; font-size: .6em;" >
 <input type="submit" value="Search" title="This will search the database and return a list of riders matching the key entered" style="font-size:.5em; display:inline;">
 
 <?php
@@ -285,7 +293,8 @@ if ($_SESSION['ACCESSLEVEL'] >= $GLOBALS['ACCESSLEVEL_READONLY'] )
 		echo("<li><a href=\"index.php?c=".$CMDWORDS['riders']."&amp;ShowPillions=only\" >Pillions only</a></li> ");
 		echo("<li><a href=\"index.php?c=".$CMDWORDS['riders']."&amp;MileEaters=show\" >Mile Eaters</a></li> ");
 		echo("<li><a href=\"index.php?c=".$CMDWORDS['riders']."&amp;NonUK=only\" >Non-UK Riders/Pillions</a></li> ");
-		echo("<li><a href=\"index.php?c=".$CMDWORDS['riders']."&amp;Inactive\" >Inactive members</a></li> ");
+		echo("<li><a href=\"index.php?c=".$CMDWORDS['riders']."&amp;oldnew=Inactive\" >Inactive members</a></li> ");
+		echo("<li><a href=\"index.php?c=".$CMDWORDS['riders']."&amp;oldnew=Active\" >Active members</a></li> ");
 		echo("<li><a href=\"index.php?c=dbcheck\" >Possible duplicates</a></li> ");
 		echo("<li><a href=\"index.php?c=friders\" >Tagged records</a></li> ");
 		echo("</ul>");
@@ -306,7 +315,7 @@ if ($_SESSION['ACCESSLEVEL'] >= $GLOBALS['ACCESSLEVEL_READONLY'] )
 		$rr = sql_query("SELECT * FROM rallies ORDER BY RallyID");
 		while(True)
 		{
-			$rd = mysqli_fetch_assoc($rr);
+			$rd = $rr->fetchArray();
 			if ($rd == FALSE) break;
 			echo("<li><a href=\"index.php?c=".$CMDWORDS['rallies']."&amp;id=".$rd['RallyID']."\">".$rd['RallyTitle']."</a></li>");
 		}
@@ -435,7 +444,7 @@ function show_common_paging($maxrows,$extralink='')
         $tpo = ($tp * $PAGESIZE);
         echo("<li>[<a href=\"index.php?$qs&amp;offset=$tpo&amp;pagesize=$PAGESIZE\" title='Next page'>$NEXT_PAGE</a>]</li>");
     }
-    echo("<li>[<a href=\"index.php?$qs&amp;all\">Show all</a>]</li>");
+    echo("<li>[<a href=\"index.php?$qs&amp;show=all\">Show all</a>]</li>");
 	if ($extralink != '') echo(" <li>[".$extralink."]</li> ");
     echo("</ul></nav>\n");
 
@@ -454,6 +463,20 @@ function safe_default_action()
 	show_roll_of_honour();
 	exit;
 
+}
+
+function touchRider($riderid)
+/*
+ * This touches the rider record by setting the value of CurrentMember to 'Y'
+ * and DateLastActive to today's date.active
+ * 
+ * This is called whenever some positive action, such as a new ride, is recorded
+ * for the specified rider.active
+ * 
+ */
+{
+	$sql = "UPDATE riders SET CurrentMember='Y', DateLastActive='".date("Y-m-d")."' WHERE riderid=".$riderid;
+	sql_query($sql);
 }
 
 ?>

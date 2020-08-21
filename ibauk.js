@@ -2,33 +2,30 @@
  *
  * I B A U K - ibauk.js
  *
- * Copyright (c) 2017 Bob Stammers
+ * Copyright (c) 2020 Bob Stammers
  *
  * 2017-01	Include 'Omitted from RoH' status
+ * 2020-08	AJAX code
  */
-function isBadLength(sObj,iLen,sMsg) {
+
+ const KmsPerMile = 1.60934;
+
+ function isBadLength(sObj,iLen,sMsg) {
 
     if (sObj.value.length < iLen) {
       alert(sMsg)
       sObj.focus()
       return true
     }
-}
-function getObj(frmname,fname,fid) {
+  }
+  function getObj(frmname,fname,fid) {
 
     x = "res=document." + frmname + '.' + fname + '$' + fid;
     res = '';
     eval(x);
     return res;
 
-}
-
-function todaysDate()
-/* Return today's date as YYYY-MM-DD */
-{
-	var dt = new Date;
-	return dt.toISOString().substr(0,10);
-}
+  }
 
 function ValidateDate(dtObj)
 {
@@ -221,7 +218,7 @@ function reflectCertOrigin()
 	 *
 	 */
 	 var foreignColor = "red";
-	 var localColor = "#fff0b3";
+	 var localColor = "lightgray";
 	 var xForeignCert = document.getElementById('foreignCert').checked;
 	 var xDiv = document.getElementById('tab_ibadata');
 	 if (!xDiv) return;
@@ -244,10 +241,14 @@ function setRideStatus()
 {
 	var res = '++++++++';
 	/*alert('[' + document.getElementById('DateVerified').value + ']');*/
+	document.getElementById('rsok').classList.add('checked');
+	document.getElementById('rsfailed').className = 'indicator';
 	if (document.getElementById('foreignCert').checked && document.getElementById('publishRoH').checked) {
 		res = 'Complete';
 	} else if (document.getElementById('isFailedRide').checked) {
 		res = 'FAILED';
+		document.getElementById('rsok').className = 'indicator';
+		document.getElementById('rsfailed').classList.add('checked');
 	} else if (document.getElementById('SentToUSA').checked && document.getElementById('publishRoH').checked) {
 		res = 'COMPLETE';
 	} else if (document.getElementById('publishRoH').checked) {
@@ -287,4 +288,65 @@ function setRideFromRideID()
 	var ride = sel.options[sel.selectedIndex].text;
 	var txt = document.getElementById('IBA_Ride');
 	txt.value = ride;
+}
+
+function enableSave()
+{
+	try {
+		let btn = document.getElementById('UpdateSaveButton');
+		if (btn)
+			btn.disabled = false;
+	} catch(err) {
+		;
+	}
+}
+
+
+function todaysDate() 
+{
+	var today = new Date();
+	var dd = String(today.getDate()).padStart(2, '0');
+	var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+	var yyyy = today.getFullYear();
+
+	return yyyy + '-' + mm + '-' + dd;
+}
+
+function touchDate(id)
+{
+	let obj = document.getElementById(id);
+	if (obj) {
+		obj.value = todaysDate();
+		enableSave();
+	}
+	return false;
+}
+
+function calcOdoMiles() {
+
+	let odo1 = document.getElementById('StartOdo');
+	let odo2 = document.getElementById('FinishOdo');
+	let odokms = document.getElementById('ko2').checked;
+	let ododiff = parseInt(odo2.value) - parseInt(odo1.value);
+	let odomiles = odokms ? (ododiff / KmsPerMile) : ododiff;
+	odomiles = odomiles.toFixed(0);
+	document.getElementById('OdoMiles').innerHTML = odomiles + ' miles';
+
+}
+
+function setRiderTag(obj) 
+{
+	event.cancelBubble = true;
+	
+	let riderid = obj.getAttribute('data-riderid');
+	let tagged = obj.checked ? 1 : 0;
+
+	let xhttp = new XMLHttpRequest();
+	xhttp.onreadystatechange = function() {
+		if (this.readyState == 4 && this.status == 200) {
+		}
+	};
+	xhttp.open("GET", "ajax.php?c=setRiderTag&riderid="+riderid+'&tag='+tagged, true);
+	xhttp.send();
+
 }

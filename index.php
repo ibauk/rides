@@ -164,9 +164,9 @@ switch (strtoupper($cmd))
 		include("riders.php");
 		put_rider();
 		exit;
-	case strtoupper($CMDWORDS['putridename']):
-		include("ridenames.php");
-		update_ridename();
+	case 'CLEARTAGS':
+		include('dbcheck.php');
+		clearTags();
 		exit;
 	case 'MERGERIDERS':
 		include('dbcheck.php');

@@ -2,7 +2,10 @@
 /*
  * I B A U K - dbexport.php
  *
- * Copyright (c) 2016 Bob Stammers
+ * This is the SQLITE version
+ * 
+ * 
+ * Copyright (c) 2020 Bob Stammers
  *
  */
  
@@ -24,19 +27,19 @@ function export_database()
 	header("Content-Disposition: attachment; filename=".$db_ibauk."_fulldump.sql");
 	echo "-- $APPLICATION_TITLE v$APPLICATION_VERSION\n";
 	echo "-- Exported at ".date("Y-m-d H:i:s")."\n\n";
-	echo "CREATE DATABASE  IF NOT EXISTS `".$db_ibauk."` /*!40100 DEFAULT CHARACTER SET utf8 */;\n";
-	echo "USE `".$db_ibauk."`;\n\n";
-	sql_query("SET NAMES utf8");
-  	$r = sql_query("SHOW TABLES");
-	$xx = 'Tables_in_'.$db_ibauk;
+	echo "BEGIN;";
+	//echo "CREATE DATABASE  IF NOT EXISTS `".$db_ibauk."` /*!40100 DEFAULT CHARACTER SET utf8 */;\n";
+	//echo "USE `".$db_ibauk."`;\n\n";
+	//sql_query("SET NAMES utf8");
+  	$r = sql_query("SELECT name FROM sqlite_master WHERE type='table'");
 
 	while (TRUE)
 	{
-		$rr = mysqli_fetch_assoc($r);
+		$rr = $r->fetchArray();
 		if ($rr == FALSE) break;
-		dump_table_sql($rr[$xx]);
+		dump_table_sql($rr["name"]);
 	}
-
+	echo "COMMIT;";
 	echo "\n-- Export complete at ".date("Y-m-d H:i:s")."\n\n";
 
 	exit();

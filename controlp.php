@@ -3,7 +3,10 @@
 /*
  * I B A U K - controlp.php
  *
- * Copyright (c) 2018 Bob Stammers
+ * This is the SQLITE version
+ * 
+ * 
+ * Copyright (c) 2020 Bob Stammers
  *
  */
 
@@ -11,13 +14,32 @@
  // Fail quietly if called directly
  if (!function_exists('start_html')) exit;
  
+ $MIT = <<<'EOT'
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+EOT;
+
 //function show_about()
 //{
-    global $db_ibauk, $db_user, $ACCESSLEVELS, $MYKEYWORDS, $db_ibauk_conn, $CMDWORDS;
+    global $db_ibauk, $db_user, $ACCESSLEVELS, $MYKEYWORDS, $db_ibauk_conn, $CMDWORDS, $MIT;
 
     start_html("About ".application_title());
     echo("<h2>".application_title()." version ".$GLOBALS['APPLICATION_VERSION']."</h2>\n");
-	echo("<p class=\"copyrite\">".$GLOBALS['APPLICATION_COPYRIGHT']."<br /><br /></p>");
 
 	$OK = ($_SESSION['ACCESSLEVEL'] >= $GLOBALS['ACCESSLEVEL_READONLY']);
 	if (!$OK)
@@ -26,11 +48,15 @@
 		return;
 	}
 	
-    $SQL  = " SELECT timestamp, DATE_FORMAT(timestamp,'%W, %D %M %Y at %l:%i%p') AS timestamp1,userid FROM history ORDER BY timestamp DESC LIMIT 0,1";
-    $r = sql_query($SQL);
-    $rr = mysqli_fetch_assoc($r);
-    if ($rr <> FALSE)
-        echo("<p>The database was last updated ".$rr['timestamp1']." by '".$rr['userid']."'</p>");
+    //$SQL  = " SELECT timestamp, DATE_FORMAT(timestamp,'%W, %D %M %Y at %l:%i%p') AS timestamp1,userid FROM history ORDER BY timestamp DESC LIMIT 0,1";
+    //$r = sql_query($SQL);
+    //$rr = $r->fetchArray();
+	//if ($rr <> FALSE)
+	$sql = "SELECT LastUpdated,LastUpdatedBy FROM sysvars";
+	$r = sql_query($sql);
+	$rr = $r->fetchArray();
+	if ($rr['LastUpdated'] != '')
+    	echo("<p>The database was last updated ".$rr['LastUpdated']." by '".$rr['LastUpdatedBy']."'</p>");
 		
 	if ($_SESSION['USERNAME'] != "")
 		echo("<p>You are logged in as ".strtoupper($_SESSION['USERNAME'])." with access level ".strtoupper($ACCESSLEVELS[$_SESSION['ACCESSLEVEL']])."</p>");
@@ -64,40 +90,46 @@
 	if ($serveraddr=='')
 		$serveraddr = $_SERVER['LOCAL_ADDR'];
 	//var_dump($_SERVER);
-	$mysqlname = strtok(mysqli_get_host_info($db_ibauk_conn)," ");
+	$mysqlname = "sqlite"; //strtok(mysqli_get_host_info($db_ibauk_conn)," ");
 	$mysqladdr = gethostbyname($mysqlname);
 	if (strtoupper($mysqlname)=='LOCALHOST' and $serveraddr=='127.0.0.1')
 		$mysqlname = $servername;
 
-	echo("<p>This is a PHP/MySQL application running on a computer called <strong>".$servername." [".$serveraddr."]</strong> ");
+	echo("<p>This is a PHP application running on a computer called <strong>".$servername." [".$serveraddr."]</strong> ");
 	echo("It's installed in the folder <strong>".$_SERVER['DOCUMENT_ROOT']."</strong> and is using PHP version <strong>".phpversion()."</strong> running under <strong>".php_uname('s')." ".php_uname('v')."; ".$_SERVER['SERVER_SOFTWARE']."</strong></p>");
 
-    echo("<p>MySQL is version <strong>".mysqli_get_server_info($db_ibauk_conn)."</strong>, running on <strong>".mysqli_get_host_info($db_ibauk_conn)." [".$mysqlname."]</strong>.</p>");
-    echo("<p>The database schema is <strong>$db_ibauk</strong> and is accessed via userid '<strong>$db_user</strong>'");
-	$r = sql_query("SHOW VARIABLES LIKE 'datadir'");
-	$rr = mysqli_fetch_assoc($r);
+    //echo("<p>MySQL is version <strong>".mysqli_get_server_info($db_ibauk_conn)."</strong>, running on <strong>".mysqli_get_host_info($db_ibauk_conn)." [".$mysqlname."]</strong>.</p>");
+    //echo("<p>The database schema is <strong>$db_ibauk</strong> and is accessed via userid '<strong>$db_user</strong>'");
+	//$r = sql_query("SHOW VARIABLES LIKE 'datadir'");
+	//$rr = mysqli_fetch_assoc($r);
 	
-	$xx = $rr["Value"];
+	//$xx = $rr["Value"];
 	
-	if ($rr <> FALSE)
-		echo("&nbsp;&nbsp; MySQL stores its databases in the folder <strong>".$xx."</strong>");
-	echo("</p>");
+	//if ($rr <> FALSE)
+	//	echo("&nbsp;&nbsp; MySQL stores its databases in the folder <strong>".$xx."</strong>");
+	//echo("</p>");
 
-	$r = sql_query("SHOW TABLES");
-	$xx = 'Tables_in_'.$db_ibauk;
+	$r = sql_query("SELECT name FROM sqlite_master WHERE type='table'");
+
+
 	echo("<ul>");
 	while (TRUE)
 	{
-		$rr = mysqli_fetch_assoc($r);
+		$rr = $r->fetchArray();
 		if ($rr == FALSE) break;
-		$SQL = "SELECT count(*) as Rex FROM ".$rr[$xx];
+		$SQL = "SELECT count(*) as Rex FROM ".$rr['name'];
 		$n = sql_query($SQL);
-		$nn = mysqli_fetch_assoc($n);
-		$SQL = "SELECT count(*) as Rex FROM ".$rr[$xx]." WHERE Deleted='Y'";
+		error_log($SQL);
+		$nn = $n->fetchArray();
+		$SQL = "SELECT count(*) as Rex FROM ".$rr['name']." WHERE Deleted='Y'";
+		error_log($SQL);
 		$n = sql_query($SQL);
-		$zz = mysqli_fetch_assoc($n);
+		if ($n) 
+			$zz = $n->fetchArray();
+		else
+			$zz = 0;
 		
-		echo("<li>Table <strong>".$rr[$xx]."</strong> has <strong>".number_format($nn['Rex'])."</strong> records");
+		echo("<li>Table <strong>".$rr['name']."</strong> has <strong>".number_format($nn['Rex'])."</strong> records");
 		if ($zz != false)
 			if ($zz['Rex'] > 0)
 				echo(" (<strong>".number_format($zz['Rex'])."</strong> deleted)");
@@ -115,8 +147,10 @@
 <div class="tabContent" id="tab_database">
 	<form action="index.php" method="post">
 	<input type="hidden" name="cmd" value="marksent">
-	<p>You can mark all outstanding rides as having been reported to the USA by clicking this button. Those rides will all be marked as having been reported today. <strong>This is an immediate and irreversible operation, only click the button if you're sure!</strong></p>
-	<input type="submit" title="This will act without further confirmation!" value="Mark all as sent to USA">
+	<p>You can mark all outstanding rides as having been reported to the USA by clicking this button. Those rides will all be marked as having been reported today.</p>
+	<p> <strong>This is an immediate and irreversible operation, only click the button if you're sure!</strong></p>
+	<input type="checkbox" onclick="document.getElementById('Send2USA').disabled=!this.checked;"> 
+	<input id="Send2USA" disabled type="submit" title="This will act without further confirmation!" value="Mark all as sent to USA">
 	</form>
 	<hr />
 	<form action="index.php" method="get">
@@ -124,31 +158,33 @@
 	<p>Import ride/rally data from a spreadsheet</p>
 	<input type="submit" title="" value="Start import">
 	</form>
+	<!--
 	<hr />
 	<form action="index.php" method="post">
 	<input type="hidden" name="cmd" value="marklapsed">
-	<p>You can mark members as being 'Lapsed' by setting a cutoff date for recent activity. Anyone inactive since
+	<p>You can permanently mark members as being 'inactive' by setting a cutoff date for recent activity. Anyone inactive since
 	<?php
 	$dt = New DateTime();
 	$dtx = $dt->sub(new DateInterval('P3Y'));
 	$dtxy = $dtx->format('Y-m-d');
 	echo("<input type=\"date\" name=\"datelapsed\" value=\"$dtxy\">");
 	?>
-	 will be marked as lapsed when you press <input type="submit" title="" value="Mark as lapsed"</p>
+	 will be marked as inactive when you press <input type="submit" title="" value="Mark as inactive">. 
+	 These flagged records will show up on 'inactive' lists regardless of the variables used for that run.</p>
 	</form>
-	
+	-->
 </div>
 <div class="tabContent" id="tab_settings">
 	<form action="index.php" method="get">
 	<fieldset><legend>Show deleted records</legend>
-	<input type="radio" name="ShowDeleted" class="radio" value="Y" <?php echo(Checkbox_isChecked($_SESSION['ShowDeleted']));?>>YES</input>
-	<input type="radio" name="ShowDeleted" class="radio2" value="N" <?php echo(Checkbox_isNotChecked($_SESSION['ShowDeleted']));?>>no</input>
+	<input type="radio" name="ShowDeleted" id="ShowDeletedY" class="radio" value="Y" <?php echo(Checkbox_isChecked($_SESSION['ShowDeleted']));?>> <label for="ShowDeletedY">YES &nbsp;&nbsp;</label>
+	<input type="radio" name="ShowDeleted" id="ShowDeletedN" class="radio2" value="N" <?php echo(Checkbox_isNotChecked($_SESSION['ShowDeleted']));?>> <label for="ShowDeletedN">no </label>
 	</fieldset>	
 	<fieldset><legend>Member status</legend>
 	<select name="ShowMemberStatus">
 	<option value="all"<?php echo(OptionSelected($_SESSION['ShowMemberStatus'],'all'));?>>Show all members</option>
-	<option value="current"<?php echo(OptionSelected($_SESSION['ShowMemberStatus'],'current'));?>>Only current members</option>
-	<option value="lapsed"<?php echo(OptionSelected($_SESSION['ShowMemberStatus'],'lapsed'));?>>Only lapsed members</option>
+	<option value="current"<?php echo(OptionSelected($_SESSION['ShowMemberStatus'],'current'));?>>Only active members</option>
+	<option value="lapsed"<?php echo(OptionSelected($_SESSION['ShowMemberStatus'],'lapsed'));?>>Only inactive members</option>
 	</select>
 	</fieldset>	
 	<input type="submit" name="cmd" value="<?php echo($CMDWORDS['savesettings']);?>">
@@ -163,6 +199,9 @@
 		echo('</div>');
 	}
 
+	echo("<p style=\"cursor:pointer;\" onclick=\"document.getElementById('mit').style.display='block';\" class=\"copyrite\">".$GLOBALS['APPLICATION_COPYRIGHT']."</p>");
+
+	echo('<pre id="mit" style="display:none;">'.$MIT.'</pre>');
     echo("</body></html>\n");
 //}
 

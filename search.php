@@ -2,7 +2,10 @@
 /*
  * I B A U K - search.php
  *
- * Copyright (c) 2016 Bob Stammers
+ * This is the SQLITE version
+ * 
+ * 
+ * Copyright (c) 2020 Bob Stammers
  *
  */
 
@@ -15,7 +18,7 @@ $WHEREKEY = '';
 
 function buildSearchSQL($ResultsAsRides)
 {
-	$SEARCH_SQL = "SELECT SQL_CALC_FOUND_ROWS ";
+	$SEARCH_SQL = "SELECT  ";
 	
 	
 	if ($ResultsAsRides)
@@ -194,7 +197,7 @@ function search_results_row($ride_data,$showrides)
 			if ($_SESSION['ShowDeleted'] <> 'Y')
 				$SQL .= " AND (rides.Deleted='N' OR rides.Deleted is null)";
 			$rr = sql_query($SQL);
-			$rrd = mysqli_fetch_assoc($rr);
+			$rrd = $rr->fetchArray();
 		}
 		else
 			$rrd['Rex'] = '';
@@ -212,7 +215,8 @@ function show_search_results($where)
 {
     global $_KEY_ORDER, $KEY_DESC, $OFFSET, $PAGESIZE, $CMDWORDS, $KEY_FIND;
 
-    $SearchSQL = buildSearchSQL($_REQUEST['parShowResults']=='rides');
+	$SearchSQL = buildSearchSQL($_REQUEST['parShowResults']=='rides');
+	$SearchWhere = '';
 	$SQL = $SearchSQL;
     
 	if ($where <> '') 
@@ -233,10 +237,10 @@ function show_search_results($where)
 	$SQL .= sql_order();
 	//echo($SQL.'<hr />');
     $ride = sql_query($SQL);
-	$TotRows = foundrows();
+	$TotRows = countrecs($ride);
 	$xl = '';
 	echo("<div class=\"maindata\" $TotRows><br /<br />");
-	if ($TotRows > mysqli_num_rows($ride))
+	if ($TotRows > countrecs($ride))
 		show_common_paging($TotRows,$xl);
     echo("<table>");
 	if ($_REQUEST['parShowResults']=='rides')
@@ -268,7 +272,7 @@ function show_search_results($where)
 	$NRL = ($_REQUEST['c'] == 'snr');
     while(true)
     {
-        $ride_data = mysqli_fetch_assoc($ride);
+        $ride_data = $ride->fetchArray();
         if ($ride_data == false) 
 		{
 			break;
@@ -309,7 +313,7 @@ function show_search_results($where)
 		echo(search_results_row($ride_data,false)."</tr>\n");
 	}
 	echo("</table>");
-	if ($TotRows > mysqli_num_rows($ride))
+	if ($TotRows > countrecs($ride))
 		show_common_paging($TotRows,$xl);
 	// echo("<p>".$SearchSQL."</p>");
 ?>
@@ -391,7 +395,7 @@ if ($KEY_FIND != '' || $_REQUEST['x'] != '')
 	
     $res = searchall($KEY_FIND,$KEY_ORDER,$KEY_ORDER==$KEY_DESC);
 
-	$N = foundrows();
+	$N = countrecs($res);
 
     start_html("Searching records");
 	//var_dump($_REQUEST);
@@ -415,21 +419,21 @@ $SQL  = "SELECT COUNT(*) AS numrides FROM rides";
 if ($_SESSION['ShowDeleted'] <> 'Y')
 	$SQL .= " WHERE Deleted='N'";
 $r = sql_query($SQL);
-$rr = mysqli_fetch_assoc($r);
+$rr = $r->fetchArray();
 $numrides = $rr['numrides'];
 
 $SQL  = "SELECT COUNT(*) AS numriders FROM riders";
 if ($_SESSION['ShowDeleted'] <> 'Y')
 	$SQL .= " WHERE Deleted='N'";
 $r = sql_query($SQL);
-$rr = mysqli_fetch_assoc($r);
+$rr = $r->fetchArray();
 $numriders = $rr['numriders'];
 
 $SQL  = "SELECT COUNT(*) AS numbikes FROM bikes";
 if ($_SESSION['ShowDeleted'] <> 'Y')
 	$SQL .= " WHERE Deleted='N'";
 $r = sql_query($SQL);
-$rr = mysqli_fetch_assoc($r);
+$rr = $r->fetchArray();
 $numbikes = $rr['numbikes'];
 
 ?>

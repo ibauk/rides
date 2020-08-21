@@ -2,7 +2,10 @@
 /*
  * I B A U K - rallies.php
  *
- * Copyright (c) 2016 Bob Stammers
+ * This is the SQLITE version
+ * 
+ * 
+ * Copyright (c) 2020 Bob Stammers
  *
  */
 
@@ -29,7 +32,9 @@ function rallies_table_row_html($ride_data)
 
 	$res = '';
 	// Skip the first field, which is used for linking
-	for ($ix = 1; $ix < count($ride_data); $ix++)
+	$numflds = count($ride_data) / 2; // Because numeric index as well as fieldname
+	error_log("numflds==$numflds");
+	for ($ix = 1; $ix < $numflds; $ix++)
 		$res .= "<td>".$ride_data[$ix]."</td>";
     return $res;
 }
@@ -39,10 +44,11 @@ function rallies_table_row_html($ride_data)
 
 function show_rallies_table($where,$what)
 {
-    global $ORDER, $DESC, $OFFSET, $PAGESIZE, $CMDWORDS;
+    global $ORDER, $DESC, $OFFSET, $PAGESIZE, $CMDWORDS, $RIDERS_SQL;
 
+	$xl = '';
     $SQL = str_replace('#WHERE#',$where <> '' ? " WHERE $where " : '',$RIDERS_SQL);
-	if ($_REQUEST['event']=='')
+	if (!isset($_REQUEST['event']) || $_REQUEST['event']=='')
 	{
 		$SQL = "SELECT RallyID As RowID,RallyID, Count(recid) As Finishers FROM rallyresults WHERE RallyID LIKE '".$_REQUEST['id']."%' GROUP BY RallyID ORDER BY RallyID";
 		$hdrs = "Event;Finishers";
@@ -56,12 +62,16 @@ function show_rallies_table($where,$what)
 	}
 
 	//$SQL .= sql_order();
-	//echo($SQL.'<hr />');
+	error_log($SQL);
     $ride = sql_query($SQL);
-	$TotRows = foundrows();
-	echo("<div class=\"maindata\" $TotRows><br /<br />");
-	if ($TotRows > mysqli_num_rows($ride))
-		show_common_paging($TotRows,$xl);
+	$TotRows = foundrows($ride);
+	echo("<div class=\"maindata\">");
+	$numrows = 0;
+	while ($rd = $ride->fetchArray())
+		$numrows++;
+	$ride->reset();
+	//if ($TotRows > $numrows)
+		//show_common_paging($TotRows,$xl);
     echo("<table>");
 	echo("<caption>$what</caption>");
 	echo("<tr>".rallies_table_row_header($hdrs)."</tr>\n");
@@ -69,8 +79,10 @@ function show_rallies_table($where,$what)
 	$OK = ($_SESSION['ACCESSLEVEL'] >= $GLOBALS['ACCESSLEVEL_READONLY']);
     while(true)
     {
-        $ride_data = mysqli_fetch_array($ride,MYSQLI_NUM);
-        if ($ride_data == false) break;
+        $ride_data = $ride->fetchArray();
+		if ($ride_data == false) break;
+		//print_r($ride_data);
+		//echo('<hr>');
 		if ($OK)
 			$trspec = "onclick=\"window.location='index.php?c=".$cmd.$ride_data[0]."'\" class=\"goto row-";
 		else
@@ -102,9 +114,8 @@ function show_rallies_listing()
 		$SQL = "SELECT RallyTitle FROM rallies WHERE RallyID='".$_REQUEST['id']."'";
 		$rr = sql_query($SQL);
 		
-		$rd = mysqli_fetch_assoc($rr);
+		$rd = $rr->fetchArray();
 		$what = $rd['RallyTitle'].' <strong>'.$_REQUEST['event'].'</strong>';
-		mysqli_close($rr);
 	}
 
 	$OK = ($_SESSION['ACCESSLEVEL'] >= $GLOBALS['ACCESSLEVEL_READONLY']);

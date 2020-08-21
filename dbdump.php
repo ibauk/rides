@@ -37,11 +37,11 @@ function dump_csv()
 		$wx = " WHERE $where";
 	else
 		$wx = '';
-	$mysql = str_replace('*',$scols,$sql).$wx;
+	$mysql = preg_replace('/\*/',$scols,$sql,1).$wx;
 	$p = strpos($mysql,' LIMIT ');
 	if ($p !== false)
 		$mysql = substr($mysql,0,$p);
-	//echo($mysql."<hr />");
+	error_log("SQL: ".$mysql);
 	header('Content-type: text/csv; charset=utf-8');
 	header('Content-Disposition: attachment; filename="'.$csvname.'"');
 	dump_selection($mysql);

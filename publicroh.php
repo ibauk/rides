@@ -2,7 +2,10 @@
 /*
  * I B A U K - publicroh.php
  *
- * Copyright (c) 2018 Bob Stammers
+ * This is the SQLITE version
+ * 
+ * 
+ * Copyright (c) 2020 Bob Stammers
  *
  * 2017-01	Added in RideStars handling
  * 2018-06	Present most recent first
@@ -11,7 +14,7 @@
 require_once("general.conf.php");
 require_once("db.conf.php");
 
-$PUBLIC_RIDES_SQL  = "SELECT SQL_CALC_FOUND_ROWS DateRideStart,NameOnCertificate,IfNull(RideStars,'') As RideStars,IBA_Number,IBA_Ride,Bike,EventName FROM rides LEFT JOIN riders ON rides.riderid=riders.riderid LEFT JOIN bikes ON rides.bikeid=bikes.bikeid ";
+$PUBLIC_RIDES_SQL  = "SELECT DateRideStart,NameOnCertificate,IfNull(RideStars,'') As RideStars,IBA_Number,IBA_Ride,Bike,EventName FROM rides LEFT JOIN riders ON rides.riderid=riders.riderid LEFT JOIN bikes ON rides.bikeid=bikes.bikeid";
 
 
 ?>
@@ -44,6 +47,7 @@ $PUBLIC_RIDES_SQL  = "SELECT SQL_CALC_FOUND_ROWS DateRideStart,NameOnCertificate
 <script type="text/javascript">
 $(document).ready(function() {
 	oTable = $('#dataTable').dataTable({
+		"order": [],
 		"bJQueryUI": true,
 		"aoColumnDefs": [
 						{ "iDataSort": [ 6 ], "aTargets": [ 0 ] },
@@ -84,7 +88,7 @@ $(document).ready(function() {
 	$rs = sql_query($SQL);
 	while (true)
 	{
-		$rd = mysqli_fetch_assoc($rs);
+		$rd = $rs->fetchArray();
 		if ($rd == false) break;
 		
 		echo("<tr>");

@@ -48,7 +48,7 @@ function import_imports() {
 	
 	$sql = "SELECT * FROM bulkimports ORDER BY recid";
 	$r = sql_query($sql);
-	while ($rr = mysqli_fetch_assoc($r)) {
+	while ($rr = $r->fetchArray()) {
 
 		$ridedate = $rr['ridedate'];
 		
@@ -196,7 +196,7 @@ function browse_imports($seq,$offset,$nrows) {
 	echo("</tr></thead><tbody>");
 	$row = "1";
 	$alert = " class=\"infohilite\"";
-	while ($rr = mysqli_fetch_assoc($r)) {
+	while ($rr = $r->fetchArray()) {
 		echo("<tr class=\"row-$row\">");
 		if ($row == '1')
 			$row = '2';
@@ -225,7 +225,7 @@ function browse_imports($seq,$offset,$nrows) {
 			$ssql = "SELECT Bike FROM bikes WHERE riderid=".$rr['riderid'];
 			$rb = sql_query($ssql);
 			$bikes = '';
-			while ($rbd = mysqli_fetch_assoc($rb))
+			while ($rbd = $rb->fetchArray())
 				$bikes .= $rbd['Bike']."\r\n";
 			if ($bikes == '')
 				$bikes = "No existing bike records";

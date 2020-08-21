@@ -2,7 +2,10 @@
 /* 
  * I B A U K - manageimports.php
  *
- * Copyright (c) 2017 Bob Stammers
+ * This is the SQLITE version
+ * 
+ * 
+ * Copyright (c) 2020 Bob Stammers
  *
  */
 
@@ -70,7 +73,7 @@ function upload() {
  
 	start_html("Starting an import");
 	$R = sql_query("SELECT count(*) As Rex FROM bulkimports");
-	$rr = mysqli_fetch_assoc($R);
+	$rr = $R->fetchArray();
 	$nrex = $rr['Rex'];
 ?>
 <h2>Import rides/rally results from spreadsheet</h2>

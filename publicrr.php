@@ -2,7 +2,7 @@
 /*
  * I B A U K - publicrr.php
  *
- * Copyright (c) 2017 Bob Stammers
+ * Copyright (c) 2019 Bob Stammers
  *
  * Rally results
  */
@@ -10,7 +10,7 @@
 require_once("general.conf.php");
 require_once("db.conf.php");
 
-$PUBLIC_RIDES_SQL  = "SELECT SQL_CALC_FOUND_ROWS RallyID,FinishPosition,RallyMiles,RallyPoints,Rider_Name,IfNull(Bike,'&nbsp;') As Bike FROM rallyresults LEFT JOIN riders ON rallyresults.riderid=riders.riderid LEFT JOIN bikes ON rallyresults.bikeid=bikes.bikeid";
+$PUBLIC_RIDES_SQL  = "SELECT SQL_CALC_FOUND_ROWS RallyID,FinishPosition,RallyMiles,RallyPoints,Rider_Name,IfNull(Bike,'&nbsp;') As Bike FROM rallyresults LEFT JOIN riders ON rallyresults.riderid=riders.riderid LEFT JOIN bikes ON rallyresults.bikeid=bikes.bikeid ORDER BY 1 DESC,2";
 
 
 ?>
@@ -43,6 +43,7 @@ $PUBLIC_RIDES_SQL  = "SELECT SQL_CALC_FOUND_ROWS RallyID,FinishPosition,RallyMil
 <script type="text/javascript">
 $(document).ready(function() {
 	oTable = $('#dataTable').dataTable({
+		"order": [],
 		"bJQueryUI": true,
 		"bScrollCollapse": false,
 		"sScrollY": "475px",

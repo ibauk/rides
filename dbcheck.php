@@ -2,9 +2,14 @@
 /*
  * I B A U K - dbcheck.php
  *
- * Copyright (c) 2016 Bob Stammers
+ * This is the SQLITE version
+ * 
+ * 
+ * Copyright (c) 2020 Bob Stammers
  *
  */
+
+include_once("riders.php");
 
 function mergeRiders($oldRider,$newRider)
 {
@@ -19,9 +24,8 @@ function mergeRiders($oldRider,$newRider)
 	
 	$SQL = "SELECT Deleted FROM riders WHERE riderid=$newRider";
 	$rr = sql_query($SQL);
-	$rd = mysqli_fetch_assoc($rr);
-	mysqli_close($rr);
-
+	$rd = $rr->fetchArray();
+	
 	if ($rd == false)
 	{
 		show_infoline("New rider [id=$newRider] doesn't exist",'errormsg');
@@ -156,6 +160,8 @@ function mergeBikes()
 function showFilteredRiders()
 {
 	global $CMDWORDS;
+	global $db_ibauk_conn;
+	global $RIDERS_SQL, $CSV_COLS;
 	
 	$OK = ($_SESSION['ACCESSLEVEL'] >= $GLOBALS['ACCESSLEVEL_READONLY']);
 	if (!$OK) safe_default_action();
@@ -163,7 +169,13 @@ function showFilteredRiders()
 	start_html("Tagged riderlist");
 	echo("<div class=\"maindata\">");
 	
-	$SQL = "SELECT riders.Rider_Name,riders.IBA_Number,riders.Postal_Address,riders.Postcode,riderid FROM riders WHERE ";
+	//echo('<br><br>'); print_r($_SESSION); echo('<hr>');
+//	$SQL = "SELECT riders.Rider_Name,riders.IBA_Number,riders.Postal_Address,riders.Postcode,riderid FROM riders WHERE ";
+
+	$SQL = "SELECT riders.Rider_Name as Rider,riders.IBA_Number as \"IBA#\",0 as Rides,riders.Country,riders.Postal_Address as Address,";
+	$SQL .= "riders.Postcode,riders.Email,riders.DateLastActive as LastActive,riderid FROM riders WHERE ";
+
+
 	$SQL .= "riderid IN (";
 	$ids = '';
 	foreach ($_SESSION as $r)
@@ -180,7 +192,7 @@ function showFilteredRiders()
 	//echo($SQL."<hr>");
 	//var_dump($_SESSION);
 	$rs = sql_query($SQL);
-	$TotRows = mysqli_num_rows($rs);
+	$TotRows = countrecs($rs);
 	if ($TotRows < 1)
 	{
 		echo("<p class=\"sorry\">So sorry Anjin-san, I am unable to find any tagged records 	\xF0\x9F\x98\x93</p>");
@@ -192,21 +204,26 @@ function showFilteredRiders()
 	$row = 0;
 	while (true)
 	{
-		$rd = mysqli_fetch_assoc($rs);
+		$rd = $rs->fetchArray(SQLITE3_ASSOC);
 		if ($rd == false) break;
 		$row++;
 		if (!$hdrwritten)
 		{
 			echo ("<tr>");
-			foreach ($rd as $fld=>$val)
+			foreach ($rd as $fld=>$val) {
 				echo("<th>$fld</th>");
+			}
 			echo ("</tr>");
 			$hdrwritten = true;
 		}
 		$trspec = "onclick=\"window.location='index.php?c=".$CMDWORDS['showrider']."&".$CMDWORDS['uri']."=".$rd['riderid']."'\" class=\"goto row-";
 		echo("<tr ".$trspec.(($row % 2) + 1)."\">");
-		foreach ($rd as $fld=>$val)
+		$sql = "SELECT IFNULL(Count(URI),0) As Rex FROM rides WHERE riderid=".$rd['riderid'];
+		$rd['Rides'] = getValueFromDB($sql,"Rex",0);
+
+		foreach ($rd as $fld=>$val) 
 			echo ("<td>".htmlentities($val)."</td>");
+			
 		echo ("</tr>");
 	}
 	echo ("</table>");
@@ -215,14 +232,32 @@ function showFilteredRiders()
 		echo("<form action=\"index.php\" method=\"post\">");
 		echo("<input type=\"hidden\" name=\"cmd\" value=\"mergeriders\">");
 		echo("<input type=\"hidden\" name=\"riderids\" value=\"$ids\">");
-		echo("<input type=\"submit\" value=\"Merge tagged records into\">");
-		echo("<select name=\"targetid\">");
+		echo("<input type=\"submit\" value=\"Merge tagged records into\"> ");
+		echo(" <select name=\"targetid\">");
 		echo("<option selected value=\"\">Select the riderid to merge into</option>");
 		foreach (explode(',',$ids) as $id)
 			echo("<option value=\"$id\">$id</option>");
-		echo("</select>");
+		echo("</select> ");
 		echo("</form>");
+
+		echo('<br>');
+		echo('<form action="index.php" method="post">');
+		echo('<input type="hidden" name="cmd" value="cleartags">');
+		echo('<input type="submit" value="Clear tags">');
+		echo('</form>');
 	}
+	$cols = $CSV_COLS;
+?>
+	<form action="index.php" method="post">
+	<input type="hidden" name="cmd" value="csv">
+	<input type="hidden" name="sql" value="<?php echo(urlencode($SQL));?>">
+	<input type="hidden" name="cols" value="<?php echo(urlencode($cols));?>">
+	<input type="hidden" name="where" value="<?php echo(urlencode(''));?>">
+	<input type="hidden" name="csvname" value="ibaukriders.csv">
+	<input type="submit" value="Download as .CSV">
+	<form>
+<?php
+
 	echo("</div></body></html>");
 	
 }
@@ -231,31 +266,46 @@ function showDuplicateRiders()
 {
 	global $CMDWORDS;
 	
-	$SQL = "SELECT riders.Rider_Name,riders.IBA_Number,riders.Postal_Address,riders.Postcode,riderid FROM riders WHERE IBA_Number In (SELECT IBA_Number FROM riders WHERE IBA_Number <> '' GROUP BY IBA_Number HAVING Count(IBA_Number)>1) ORDER BY IBA_Number";
+
+	$SQL = "SELECT riders.Rider_Name as Rider,riders.IBA_Number as \"IBA#\",0 as Rides,riders.Country,riders.Postal_Address as Address,";
+	$SQL .= "riders.Postcode,riders.Email,riders.DateLastActive as LastActive,riderid FROM riders WHERE ";
+	$SQL .= "IBA_Number In (SELECT IBA_Number FROM riders WHERE IBA_Number <> '' AND Deleted='N' GROUP BY IBA_Number HAVING Count(IBA_Number)>1) ";
+	$SQL .= " ORDER BY IBA_Number";
 	$rs = sql_query($SQL);
-	$TotRows = mysqli_num_rows($rs);
-	if ($TotRows < 1)
-		return;
+	$TotRows = foundrows($rs);
 	echo ("<table><caption>Duplicated IBA numbers (".$TotRows.")</caption>");
 	$hdrwritten = false;
 	$row = 0;
 	while (true)
 	{
-		$rd = mysqli_fetch_assoc($rs);
+		$rd = $rs->fetchArray(SQLITE3_ASSOC);
 		if ($rd == false) break;
 		$row++;
 		if (!$hdrwritten)
 		{
 			echo ("<tr>");
-			foreach ($rd as $fld=>$val)
+			foreach ($rd as $fld=>$val) {
 				echo("<th>$fld</th>");
+			}
+			echo('<th></th>');		
 			echo ("</tr>");
 			$hdrwritten = true;
 		}
 		$trspec = "onclick=\"window.location='index.php?c=".$CMDWORDS['showrider']."&".$CMDWORDS['uri']."=".$rd['riderid']."'\" class=\"goto row-";
 		echo("<tr ".$trspec.(($row % 2) + 1)."\">");
-		foreach ($rd as $fld=>$val)
+		$sql = "SELECT IFNULL(Count(URI),0) As Rex FROM rides WHERE riderid=".$rd['riderid'];
+		$rd['Rides'] = getValueFromDB($sql,"Rex",0);
+		foreach ($rd as $fld=>$val) {
 			echo ("<td>".htmlentities($val)."</td>");
+		}
+
+		$res = '<td><input type="checkbox" data-riderid="'.$rd['riderid'].'"';
+		$ridertag = "riderids['".$rd['riderid']."']";
+		$res .= isset($_SESSION[$ridertag])? ' checked '  : '';
+		$res .= 'onclick="setRiderTag(this);"';
+		$res .= '></td>';
+		echo($res);
+
 		echo ("</tr>");
 	}
 	echo ("</table>");
@@ -271,6 +321,21 @@ function checkDatabase()
 	echo("<div class=\"maindata\">");
 	showDuplicateRiders();
 	echo("</div></body></html>");
+}
+
+function clearTags()
+{
+	$OK = ($_SESSION['ACCESSLEVEL'] >= $GLOBALS['ACCESSLEVEL_READONLY']);
+	if (!$OK) safe_default_action();
+	
+	foreach ($_SESSION as $k => $v)
+		if (preg_match("/riderids\['\d+'\]/",$k))
+			unset($_SESSION[$k]);
+
+	show_riders_listing();
+	exit;
+		
+
 }
 ?>
 

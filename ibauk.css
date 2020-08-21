@@ -1,13 +1,13 @@
 /*
  * I B A U K - ibauk.css
  *
- * Copyright (c) 2016 Bob Stammers
+ * Copyright (c) 2020 Bob Stammers
  *
  * 
  */
 
 body 				{
-	background-color: 	#fff0b3;
+	background-color: #b3f0ff; /*	#fff0b3; */
 	font-family:		Verdana, Arial;
 	font-size: 			12pt;
 	margin: 			1em;
@@ -33,8 +33,8 @@ a 					{text-decoration: none;}
 p 					{ font-family: Verdana, Arial, Helvetica; font-size: 10pt }
 p.center			{ text-align: center }
 address 				{ font-family: Verdana, Arial, Helvetica; font-size: 8pt }
-span				{ font-family: Verdana, Arial, Helvetica; font-size: 10pt; }
-table				{}
+span.x				{ font-family: Verdana, Arial, Helvetica; font-size: 10pt; }
+
 td 					{ font-family: Verdana, Arial, Helvetica;  padding: 4px; text-align: left }
 span.print			{ font-size: 8pt; }
 
@@ -49,7 +49,7 @@ table.width100		{ width: 100%; border-color: #000000; border-style: solid; borde
 table.width75		{ width: 75%;  border-color: #000000; border-style: solid; border-width: 1px; }
 table.width60		{ width: 60%;  border-color: #000000; border-style: solid; border-width: 1px; }
 table.width50		{ width: 50%;  border-color: #000000; border-style: solid; border-width: 1px; }
-table       				{              border-color: #bb0000; border-style: solid; border-width: 2px; }
+table       				{ border-color: darkgray; border-style: solid; border-width: 2px; }
 
 /*td             			{ background: white; font-weight: bold; border-color: #bb0000; border-style: solid; border-width: 3px; }*/
 
@@ -125,12 +125,30 @@ div.maindata		{ margin-left: auto; margin-right: auto; max-width: 1024px; }
 /* Ride details form */
 div.detailform	{ margin-left: auto; margin-right: auto;  max-width: 1000px; }
 div.riderform	{ margin-left: auto; margin-right: auto;  max-width: 830px; }
-.boldlabel		{ padding: 0 0 0 1.5em; text-align: center vertical-align: middle; font-size: 1.2em; font-weight: bold; }
-.vlabel			{ display: inline-block; padding-right: 5px; width: 100px; min-height: 1em; text-align: right; vertical-align: top; }
-.vlabel2		{ display: inline-block; padding-right: 5px; width: 150px; min-height: 1em; text-align: right; vertical-align: top; }
-.vdata			{ display: inline-block; padding: 2px; width: 200px; min-height: 1em; text-align: left; border: 2px solid red; background-color: #d8d8d8; font-weight: bold; margin-bottom: .5em; vertical-align: top; }
-.vbottom		{ vertical-align: middle; }
-.short			{ width: 75px; }
+.boldlabel		{ padding: 0 0 0 1.5em; text-align: center; vertical-align: middle; font-size: 1.2em; font-weight: bold; }
+.vspan  {
+  display: inline-block;
+  vertical-align: middle;
+  min-height: 1.5em;
+  margin-bottom: .5em;
+}
+.vlabel			{ display: inline-block; padding-right: 5px; width: 10em; min-height: 1em; text-align: right; vertical-align: middle; }
+.vlabel2		{ display: inline-block; padding-right: 5px; width: 15em; min-height: 1em; text-align: right; vertical-align: middle; }
+.vlabel3    { padding: 2px .5em 2px 2em; vertical-align: middle; min-height: 1em;}
+.vdata			{ 
+  display: inline-block; 
+  padding: 2px; 
+  width: 12em; 
+  min-height: 1em; 
+  text-align: left; 
+  border: 2px solid darkgray; 
+  background-color: #d8d8d8; 
+  font-weight: bold; 
+  /*margin-bottom: .5em; */
+  vertical-align: middle; 
+}
+.short			{ width: 6em; }
+
 input:read-only,textarea:read-only	{ border: none; margin-left: 2px; }
 .radio			{ display: inline-block; padding: 2px 12px 2px 20px; min-height: 1em; text-align: left;  font-weight: bold; margin-bottom: .5em; vertical-align: top; }
 .radio2			{ display: inline-block; padding: 2px 12px 2px 20px; margin-left: 3em; min-height: 1em; text-align: left;  font-weight: bold; margin-bottom: .5em; vertical-align: top; }
@@ -138,14 +156,16 @@ input:read-only,textarea:read-only	{ border: none; margin-left: 2px; }
 .tall			{ height: 4em; }
 .long			{ width: 300px; }
 .bold			{ font-weight: bold; }
-fieldset			{ display: inline; margin-left: 105px; max-width: 200px; margin-bottom: 1.0em; padding-bottom: 3px;  border: 2px solid red; background-color: #d8d8d8;}
-legend			{ padding: 0.5em;  border: 2px solid red; background-color: #FFFFE0;}
+fieldset			{ display: inline-block; margin-left: 105px; max-width: 250px; margin-bottom: 1.0em; padding-bottom: 3px;  border: 2px solid darkgray; background-color: #d8d8d8;}
+legend			{ padding: 0.5em;  border: 2px solid darkgray; background-color: lightgray;}
 
 [name="IBA_Number"]		{ width:5em; }
 
 input[type="tel"] { width:10em; }
-input[type="date"] { width:10em; ] }
-input[type="submit"] { font-size: 1.2em; }
+input[type="date"] { width:10em;  }
+input[type="submit"] { font-size: 1.2em; cursor: pointer; border: 3px solid; padding: .2em; border-radius: 10px;}
+input[type="submit"]:hover:enabled { background-color:yellow; border-color: red; color: black; font-weight: bold;}
+input[type="submit"]:disabled { background-color:lightgray; color: darkgray; border-color: lightgray;}
 input[type="radio"].readonly {
   opacity: 0.5; /* not necessary */
   pointer-events: none;
@@ -172,11 +192,14 @@ ul#tabs li a { color: #42454a; background-color: #dedbde; border: 1px solid #c9c
 }
 ul#tabs li a:hover { background-color: #f1f0ee; }
 ul#tabs li a.selected { color: #000; background-color: #f1f0ee; font-weight: bold; padding: 0.7em 0.3em 0.38em 0.3em; }
-div.tabContent { border: 10px solid #c9c3ba;  padding: 0.5em;  display:inherit; }
+div.tabContent { border: 10px solid #c9c3ba;  padding: 0.5em;  display:inherit; max-width: 90em; background-color: lightgray;}
 div.tabContenthide { display: none; }
 
 caption			{ font-size: 1.2em; font-weight: bold; }
 #CurrentRideStatus	{ font-size: 1.1em; margin-left: 2em; background-color: blue; color: white; white-space: nowrap; padding-left: .5em; padding-right: .5em; }
 
 #searchform fieldset	{ margin-left: 2px; max-width: 2048px; }
+
+.indicator  { text-transform: lowercase; }
+.indicator.checked  { text-transform: uppercase; }
 

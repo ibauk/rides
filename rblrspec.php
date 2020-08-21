@@ -64,17 +64,16 @@ $IMPORTSPEC['routes']['13']['ibaride']		= "SS1000";
 
 // Spreadsheet column mapping. Leftmost is column 0
 //$IMPORTSPEC['cols']['ridestars'] = 1;
-$IMPORTSPEC['cols']['firstname'] = 0;
-$IMPORTSPEC['cols']['lastname'] = 1;
-$IMPORTSPEC['cols']['pillionname'] = 2;
-$IMPORTSPEC['cols']['bike'] = 3;
-$IMPORTSPEC['cols']['miles'] = 5;
-$IMPORTSPEC['cols']['route'] = 10;
-$IMPORTSPEC['cols']['email'] = 11;
-$IMPORTSPEC['cols']['address'] = 12;
-$IMPORTSPEC['cols']['postcode'] = 13;
-$IMPORTSPEC['cols']['phone'] = 15;
-$IMPORTSPEC['cols']['mobile'] = 16;
+$IMPORTSPEC['cols']['ridername'] = 0;
+$IMPORTSPEC['cols']['pillionname'] = 1;
+$IMPORTSPEC['cols']['bike'] = 2;
+$IMPORTSPEC['cols']['miles'] = 4;
+$IMPORTSPEC['cols']['route'] = 9;
+$IMPORTSPEC['cols']['email'] = 10;
+$IMPORTSPEC['cols']['address'] = 11;
+$IMPORTSPEC['cols']['postcode'] = 12;
+$IMPORTSPEC['cols']['phone'] = 14;
+$IMPORTSPEC['cols']['mobile'] = 15;
 
 //$IMPORTSPEC['cols']['routes']['1001'] = 7;
 //$IMPORTSPEC['cols']['routes']['1002'] = 8;
