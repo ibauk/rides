@@ -2,7 +2,10 @@
 /*
  * I B A U K - publicme.php
  *
- * Copyright (c) 2017 Bob Stammers
+ * This is the SQLITE version
+ * 
+ * 
+ * Copyright (c) 2020 Bob Stammers
  *
  */
 
@@ -16,6 +19,7 @@ $PUBLIC_RIDES_SQL  = "SELECT SQL_CALC_FOUND_ROWS Rider_Name,awardlevel,awardyear
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<title>MileEaters</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <script src="jquery.js" type="text/javascript"></script>
 <script src="jquery.dataTables.min.js" type="text/javascript"></script>
@@ -39,24 +43,13 @@ $PUBLIC_RIDES_SQL  = "SELECT SQL_CALC_FOUND_ROWS Rider_Name,awardlevel,awardyear
 </style>
 </head>
 <body>
-<script type="text/javascript">
+<script>
+
 $(document).ready(function() {
-	oTable = $('#dataTable').dataTable({
-		"bJQueryUI": true,
-		"bScrollCollapse": false,
-		"sScrollY": "182px",
-		"bAutoWidth": true,
-		"bPaginate": true,
-		"sPaginationType": "two_button", //full_numbers,two_button
-		"bStateSave": true,
-		"bInfo": true,
-		"bFilter": true,
-		"iDisplayLength": 10,
-		"bLengthChange": true,
-		"aLengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]]
+	$('#dataTable').dataTable({
+		"order": [[2,"desc"]]
 	});
 } );
-
 </script>
 <table  id="dataTable">
 <thead>
@@ -69,12 +62,12 @@ $(document).ready(function() {
 <tbody>
 <?php
 
-	$SQL = $PUBLIC_RIDES_SQL." WHERE mileeaters.Deleted='N'";
+	$SQL = $PUBLIC_RIDES_SQL." WHERE mileeaters.Deleted='N' ORDER BY awardyear DESC";
 	//echo($SQL."<hr />");
 	$rs = sql_query($SQL);
 	while (true)
 	{
-		$rd = mysqli_fetch_assoc($rs);
+		$rd = $rs->fetchArray();
 		if ($rd == false) break;
 		
 		echo("<tr>");

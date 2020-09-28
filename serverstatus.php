@@ -1,3 +1,3 @@
 <?php
-$serverstatus = 'LIVE';
+$serverstatus = 'SQLITE DEVELOPMENT';
 ?>

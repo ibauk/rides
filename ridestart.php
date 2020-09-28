@@ -2,7 +2,10 @@
 /*
  * I B A U K - ridestart.php
  *
- * Copyright (c) 2016 Bob Stammers
+ * This is the SQLITE version
+ * 
+ * 
+ * Copyright (c) 2020 Bob Stammers
  *
  */
 
@@ -21,11 +24,11 @@
 		 if ($nameornum=='')
 			return FALSE;
 	 }
-	 $sql = "SELECT riders.riderid AS RiderID,Rider_Name,IBA_Number,IsPillion,bikeid,Bike,Registration FROM riders RIGHT JOIN bikes ON riders.riderid=bikes.riderid WHERE ";
+	 $sql = "SELECT riders.riderid AS RiderID,Rider_Name,IBA_Number,IsPillion,bikeid,Bike,Registration FROM riders  JOIN bikes ON riders.riderid=bikes.riderid WHERE ";
 	 $sql .= " Rider_Name LIKE '%".$nameornum."%' OR IBA_Number='".$nameornum."' LIMIT $MAX_RIDERS";
 	 if ($_REQUEST['debug']=='sql') echo($sql."<hr>");
 	 $riderlist = sql_query($sql);
-	 $totrows = foundrows();
+	 $totrows = countrecs($riderlist);
 	 start_html("New ride: Choose rider");
 	 echo("<div class=\"maindata\">");
 	 echo("<table><caption>New ride: Choose rider</caption><tr><th></th><th>Name</th><th>IBA</th><thPillion?</th><th>Bike</th><th>Reg</th></tr>\n");
@@ -35,7 +38,7 @@
 	 $lriderid = '';
 	 while(TRUE)
 	 {
-		 $rd = mysqli_fetch_assoc($riderlist);
+		 $rd = $riderlist->fetchArray();
 		 if ($rd == FALSE) break;
 		 $xx = ($ix % 2 == 0 ? '1' : '2'); 
 		 echo("<tr onclick=\"document.getElementById('ix$ix').checked=true;\" class=\" goto row-");

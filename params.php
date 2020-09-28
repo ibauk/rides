@@ -2,7 +2,10 @@
 /*
  * B O X E S - params.php
  *
- * Copyright (c) 2016 Bob Stammers
+ * This is the SQLITE version
+ * 
+ * 
+ * Copyright (c) 2020 Bob Stammers
  *
  */
 
@@ -31,7 +34,7 @@ if(TRUE)
     echo("<td><select multiple=\"multiple\" name=\"locations[]\" onclick=\"document.PARAMS.LOCNS[1].checked=true;\">");
     while(TRUE)
     {
-        $rr = mysqli_fetch_assoc($r);
+        $rr = $r->fetchArray();
         if ($rr==FALSE) break;
         echo("<option value=\"".$rr['location']."\">".$rr['location']."</option>\n");
     }
@@ -52,7 +55,7 @@ if(TRUE)
     echo("<td><select multiple=\"multiple\" name=\"partners[]\" onclick=\"document.PARAMS.PTNRS[1].checked=true;\">");
     while(TRUE)
     {
-        $rr = mysqli_fetch_assoc($r);
+        $rr = $r->fetchArray();
         if ($rr==FALSE) break;
         echo("<option value=\"".$rr['owner']."\">".$rr['owner']."</option>\n");
     }

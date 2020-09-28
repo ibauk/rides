@@ -59,6 +59,9 @@ switch (strtoupper($cmd))
 	case 'DBEXPORT':
 		include("dbexport.php");
 		exit;
+	case 'IMPORT':
+		include('importer.php');
+		exit;
 	case 'BIKESMM':
 		include('bikes.php');
 		show_bikes_listing();
@@ -164,9 +167,9 @@ switch (strtoupper($cmd))
 		include("riders.php");
 		put_rider();
 		exit;
-	case strtoupper($CMDWORDS['putridename']):
-		include("ridenames.php");
-		update_ridename();
+	case 'CLEARTAGS':
+		include('dbcheck.php');
+		clearTags();
 		exit;
 	case 'MERGERIDERS':
 		include('dbcheck.php');
@@ -193,6 +196,13 @@ switch (strtoupper($cmd))
 		exit;
 	case 'STARTIMPORT':
 		include('manageimports.php');
+		exit;
+	case 'PUBLICAUTH':
+		include('publicauth.php');
+		exit;
+	case 'RALLIESTAB':
+		include('rallies.php');
+		edit_rallies_table();
 		exit;
     default:
 		break;

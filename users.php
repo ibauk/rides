@@ -2,7 +2,10 @@
 /*
  * I B A U K - users.php
  *
- * Copyright (c) 2016 Bob Stammers
+ * This is the SQLITE version
+ * 
+ * 
+ * Copyright (c) 2020 Bob Stammers
  *
  */
 
@@ -31,7 +34,7 @@ function update_users()
         {
             $SQL  = "SELECT * FROM users WHERE userid = '$nu'";
             $r = sql_query($SQL);
-            $rr = mysqli_fetch_assoc($r);
+            $rr = $r->fetchArray();
             $baduser = ($rr <> false);
         }
 		
@@ -96,7 +99,7 @@ function update_users()
             //$_POST['oldpassword$'.$id] = strtolower($_POST['oldpassword$'.$id]);
             $SQL  = "SELECT * FROM users WHERE userid = '$id'";
             $r = sql_query($SQL);
-            $usr = mysqli_fetch_assoc($r);
+            $usr = $r->fetchArray();
             if ($usr['accesslevel'] > $_SESSION['ACCESSLEVEL'])
             {
                 start_html("password change");
@@ -163,7 +166,7 @@ function browse_users($onlyme)
     echo("<form action=\"index.php\" method=\"post\">");
     echo("<input type=\"hidden\" name=\"cmd\" value=\"USERS\"/>");
     echo("<input type=\"hidden\" name=\"UPDATE\" value=\"USERS\"/>");
-    echo("<table border=\"1\" summary=\"User table\">");
+    echo("<table>");
     echo("<tr><th>Userid</th>");
     if (!$onlyme) echo("<th>Access level</th>");
     echo("<th>Old Password</th>");
@@ -175,7 +178,7 @@ function browse_users($onlyme)
 
     while(TRUE)
     {
-        $usr = mysqli_fetch_assoc($r);
+        $usr = $r->fetchArray();
         if ($usr == FALSE) break;
         echo("<tr><td>".$usr['userid']);
         if (!$onlyme) 
@@ -194,8 +197,11 @@ function browse_users($onlyme)
         echo("<td><input type=\"password\" name=\"oldpassword\$".$usr['userid']."\"/></td>");
         echo("<td><input type=\"password\" name=\"password1\$".$usr['userid']."\"/></td>");
         echo("<td><input type=\"password\" name=\"password2\$".$usr['userid']."\"/></td>");
-        if (!$onlyme and (strtoupper($usr['userid']) != strtoupper($_SESSION['USERNAME'])))
-            echo("<td><input type=\"checkbox\" name=\"delete\$".$usr['userid']."\"/></td>");
+        if (!$onlyme)
+            if (strtoupper($usr['userid']) != strtoupper($_SESSION['USERNAME']))
+                echo("<td><input type=\"checkbox\" name=\"delete\$".$usr['userid']."\"/></td>");
+            else
+                echo('<td></td>');
         echo("</tr>");
     }
     if (!$onlyme)
@@ -213,12 +219,11 @@ function browse_users($onlyme)
 		echo("<td></td>");
         echo("<td><input type=\"password\" name=\"password1\" title=\"If blank will default to userid\"/></td>");
         echo("<td><input type=\"password\" name=\"password2\" title=\"If blank will default to userid\"/></td>");
-        echo("</tr>");
+        echo("<td></td></tr>");
     }
     echo("</table>");
     echo("<input type=\"submit\" value=\"Update\"/>");
     echo("</form>");
-    echo("</body></html>");
 }
 
 	$OK = ($_SESSION['ACCESSLEVEL'] >= $GLOBALS['ACCESSLEVEL_UPDATE']);

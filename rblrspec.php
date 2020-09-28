@@ -62,10 +62,9 @@ $IMPORTSPEC['routes']['13']['miles']			= 1004;
 $IMPORTSPEC['routes']['13']['ibaride']		= "SS1000";
 
 
-// Spreadsheet column mapping. Leftmost is column 0
+// Spreadsheet column mapping. Leftmost is column 1
 //$IMPORTSPEC['cols']['ridestars'] = 1;
-$IMPORTSPEC['cols']['firstname'] = 0;
-$IMPORTSPEC['cols']['lastname'] = 1;
+$IMPORTSPEC['cols']['ridername'] = 1;
 $IMPORTSPEC['cols']['pillionname'] = 2;
 $IMPORTSPEC['cols']['bike'] = 3;
 $IMPORTSPEC['cols']['miles'] = 5;

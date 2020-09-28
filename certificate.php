@@ -3,7 +3,10 @@
 /*
  * I B A U K - certificate.php
  *
- * Copyright (c) 2017 Bob Stammers
+ * This is the SQLITE version
+ * 
+ * 
+ * Copyright (c) 2020 Bob Stammers
  *
  */
 
@@ -136,7 +139,7 @@ function fetchCertTextFromRidenames($ridename)
 	
 	$SQL = "SELECT TemplateID FROM ridenames WHERE IBA_Ride='".$ridename."'";
 	$rs = sql_query($SQL);
-	$rd = mysqli_fetch_assoc($rs);
+	$rd = $rs->fetchArray();
 	return fetchCertTextFromDisk($TEMPLATE_TEXT_PATH.$rd['TemplateID']);
 }
 
@@ -161,7 +164,7 @@ function rideCertificateText($URI)
 
 	$SQL = "SELECT CertText FROM certificates WHERE URI=".$URI;
 	$rs = sql_query($SQL);
-	$rd = mysqli_fetch_assoc($rs);
+	$rd = $rs->fetchArray();
 	if ($rd != FALSE)
 	{
 		$res = $rd['CertText'];
@@ -172,7 +175,7 @@ function rideCertificateText($URI)
 	$SQL = "SELECT *,IfNull(ridenames.IBA_Ride_Title,ridenames.IBA_Ride) AS IBA_Ride_Title,IBA_Ride_Desc,Round(TotalMiles*".$Miles2Kilometres.",0) AS TotalKms,TemplateID,HdrImg FROM rides LEFT JOIN ridenames ON rides.IBA_Ride=ridenames.IBA_Ride LEFT JOIN riders ON rides.riderid=riders.riderid LEFT JOIN bikes ON rides.bikeid=bikes.bikeid WHERE URI=".$URI;
 	
 	$rs = sql_query($SQL);
-	$rd = mysqli_fetch_assoc($rs);
+	$rd = $rs->fetchArray();
 	if ($rd == FALSE)
 	{
 		echo("<p style=\"font-size:2em;font-weight:bold;\">ERROR - can't find that URI #".$URI."</p>");

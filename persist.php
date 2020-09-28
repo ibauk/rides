@@ -7,7 +7,7 @@
  *
  */
 
- function isLoggedin()
+function isLoggedin()
 {
 	global $SALT;
 	
@@ -27,11 +27,15 @@
 			$mysql['identifier'] = safesql($clean['identifier']);
 			if ($DEBUG) echo(" More checking ".$mysql['identifier']." ... ");
 			$result = sql_query("SELECT * FROM users  WHERE cookieid = '{$mysql['identifier']}'");
-			if (mysqli_num_rows($result)) {
-				$record = mysqli_fetch_assoc($result);
+			$foundrows = 0;
+			while ($rd = $result->fetchArray())
+				$foundrows++;
+			$result->reset();
+			if ($foundrows) {
+				$record = $result->fetchArray();
 				if ($clean['key'] != $record['cookiekey']) {
 					// fail because the key doesn't match
-					if ($DEBUG) echo(" Bad key '".$clean['key']."' -- '".record['cookiekey']."' ");
+					if ($DEBUG) echo(" Bad key '".$clean['key']."' -- '".$record['cookiekey']."' ");
 				}elseif ($now > $record['cookietimeout']){
 					// fail because the cookie has expired
 					if ($DEBUG) echo(" Now=$now; then=".$record['cookietimeout']." ");
