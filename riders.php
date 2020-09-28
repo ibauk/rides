@@ -245,8 +245,14 @@ function show_riders_listing()
 	{
 		if ($where != '') $where .= ' AND ';
 		$days = intval($_REQUEST['Current']);
+
+		$dt = New DateTime();
+		$dtx = $dt->sub(new DateInterval('P'.$days.'D'));
+		$dtxy = $dtx->format('Y-m-d');
+
+
 		if ($days > 0)
-			$where .= "DateLastActive >= DATE_SUB(CURDATE(), INTERVAL $days DAY) AND ";
+			$where .= "DateLastActive >= '".$dtxy."' AND ";
 		$where .= " CurrentMember='Y'";
 		$what .= "Current members";
 		if ($days > 0)
@@ -306,6 +312,12 @@ function show_rider_details_content($ride_data)
 	
 	$newrec = $ride_data['riderid'] == '' || $ride_data['riderid'] == 'newrec';
 	
+	if ($newrec) {
+		$bikerider = 9898989;
+	} else {
+		$bikerider = $ride_data['riderid'];
+	}
+
 	$ro = ' readonly ';
 	if ($OK) $ro = '';
 
@@ -320,7 +332,7 @@ function show_rider_details_content($ride_data)
 		$ridername = $ride_data['Rider_Name'];
 	else
 		$ridername = '&lt;new rider&gt;';
-	$res .= "<h2><a href=\"index.php?c=".$CMDWORDS['showrider']."&amp;".$CMDWORDS['uri']."=".$ride_data['riderid']."\">Rider record for <span class=\"boldlabel\">".$ridername.$ibahdr."</span></a></h2>";
+	$res .= "<h2>Rider record for <span class=\"boldlabel\">".$ridername.$ibahdr."</span></h2>";
 
 
 	$bikelist = "<datalist id=\"bikelist\">";
@@ -347,17 +359,17 @@ function show_rider_details_content($ride_data)
 	$res .= "<label for=\"Rider_Name\" class=\"vlabel\">Rider name</label><input oninput=\"enableSave();\" type=\"text\" name=\"Rider_Name\" id=\"Rider_Name\" class=\"vdata\" $ro value=\"".$ride_data['Rider_Name']."\" >";
 	$res .= "<label for=\"IBA_Number\" class=\"vlabel\">IBA Number</label><input  oninput=\"enableSave();\" type=\"number\" name=\"IBA_Number\" id=\"IBA_Number\" class=\"vdata\" $ro value=\"".$ride_data['IBA_Number']."\" ><br />";
 	$res .= "<label for=\"Postal_Address\" class=\"vlabel\">Postal address</label><textarea  oninput=\"enableSave();\" name=\"Postal_Address\" id=\"Postal_Address\" class=\"vdata tall\" maxlength=\"255\" $ro>".$ride_data['Postal_Address']."</textarea><br />";
-	$res .= "<label for=\"Postcode\" class=\"vlabel\">Postcode</label><input  oninput=\"enableSave();\" type=\"text\" name=\"Postcode\" id=\"Postcode\" class=\"vdata\" $ro maxlength=\"10\" value=\"".$ride_data['Postcode']."\" ><br />";
-	$res .= "<label for=\"Email\" class=\"vlabel\">Email</label>";
+	$res .= "<label for=\"Postcode\" class=\"vlabel\">Postcode</label><input  oninput=\"enableSave();\" type=\"text\" name=\"Postcode\" id=\"Postcode\" class=\"vdata short\" $ro maxlength=\"10\" value=\"".$ride_data['Postcode']."\" ><br />";
+	$res .= "<br><label for=\"Email\" class=\"vlabel\">Email</label>";
 	$res .= "<input  oninput=\"enableSave();\" type=\"email\" name=\"Email\" id=\"Email\" class=\"vdata\" $ro maxlength=\"45\" value=\"".$ride_data['Email']."\" >";
 	$res .= "<a id=\"emailer\" title=\"Open your email client\" tabindex=\"-1\" id=\"sendMail\" href=\"mailto:".$ride_data['Email']."\"> $EMAIL_ICON</a><br>";
-	$res .= "<label for=\"Phone\" class=\"vlabel\">Phone</label><input  title=\"Call number\" oninput=\"enableSave();\" type=\"tel\" name=\"Phone\" id=\"Phone\" class=\"vdata\" $ro maxlength=\"16\" value=\"".$ride_data['Phone']."\" >";
+	$res .= "<br><label for=\"Phone\" class=\"vlabel\">Phone</label><input  title=\"Call number\" oninput=\"enableSave();\" type=\"tel\" name=\"Phone\" id=\"Phone\" class=\"vdata\" $ro maxlength=\"16\" value=\"".$ride_data['Phone']."\" >";
 	$res .= "<a tabindex=\"-1\" id=\"callPhone\"  href=\"tel:".$ride_data['Phone']."\"> $PHONE_ICON</a>";
 	$res .= "<label for=\"AltPhone\" class=\"vlabel\">AltPhone</label><input  title=\"Call number\" oninput=\"enableSave();\" type=\"tel\" name=\"AltPhone\" id=\"AltPhone\" class=\"vdata\" $ro maxlength=\"16\" value=\"".$ride_data['AltPhone']."\" >";
 	$res .= "<a tabindex=\"-1\" id=\"callAltPhone\"  href=\"tel:".$ride_data['AltPhone']."\"> $PHONE_ICON</a><br >";
-	$res .= "<label for=\"Country\" class=\"vlabel\">Country</label> ";
-	$res .= "<input  oninput=\"enableSave();\" type=\"text\" name=\"Country\" id=\"Country\" $ro class=\"vdata\" title=\"Used for reporting purposes, not part of address\" value=\"".$ride_data['Country']."\" ><br>";
-	$res .= "<fieldset><legend>Is normally a</legend>";
+	$res .= "<br><label for=\"Country\" class=\"vlabel\">Country</label>";
+	$res .= "<input  oninput=\"enableSave();\" type=\"text\" name=\"Country\" id=\"Country\" $ro class=\"vdata shorter\" title=\"Used for reporting purposes, not part of address\" value=\"".$ride_data['Country']."\" ><br>";
+	$res .= "<br><fieldset><legend>Is normally a</legend>";
 	$res .= "<input type=\"radio\" name=\"IsPillion\"  oninput=\"enableSave();\" class=\"radio\" $ro value=\"N\" ".Checkbox_isNotChecked($ride_data['IsPillion'])."> Rider ";
 	$res .= " &nbsp;&nbsp; ";
 	$res .= "<input type=\"radio\" name=\"IsPillion\"  oninput=\"enableSave();\" class=\"radio2\" $ro value=\"Y\" ".Checkbox_isChecked($ride_data['IsPillion'])."> Pillion ";
@@ -383,7 +395,8 @@ function show_rider_details_content($ride_data)
 	$res .= "</div><div class=\"tabContent\" id=\"tab_bikesdata\">";
 
 	// Bikes
-	$SQL = "SELECT * FROM bikes WHERE riderid=".$ride_data['riderid'].andDeleted()." ORDER BY bikeid";
+	$SQL = "SELECT * FROM bikes WHERE riderid=".$bikerider.andDeleted()." ORDER BY bikeid";
+	error_log('Bikes: '.$SQL);
 	$rn = sql_query($SQL);
 	$nbikes = foundrows($rn);
 	$res .= "<table style=\" border: none; \"><tr><th>Bike</th><th>Registration</th><th>Odometer</th><th>Rides</th>";
@@ -400,11 +413,11 @@ function show_rider_details_content($ride_data)
 		$ix++;
 		$bikeslookup .= "<option>".$rnd['Bike']."</option>";
 		$res .= "<tr>";
-		$res .= "<td><input type=\"hidden\" name=\"bikeid[]\" value=\"".$rnd['bikeid']."\"><input  oninput=\"enableSave();\" type=\"text\" name=\"Bike[]\" class=\"vdata\" $ro value=\"".$rnd['Bike']."\" /></td>";
-		$res .= "<td><input  oninput=\"enableSave();\" type=\"text\" name=\"Registration[]\" class=\"vdata\" $ro value=\"".$rnd['Registration']."\" /></td>";
-		$res .= "<td><span class=\"vdata\">";
-		$res .= "<input  oninput=\"enableSave();\" type=\"radio\" name=\"KmsOdo:".$ix."[]\" class=\"radio\" $ro value=\"N\" ".Checkbox_isNotChecked($rnd['KmsOdo']).">Miles";
-		$res .= "<input  oninput=\"enableSave();\" type=\"radio\" name=\"KmsOdo:".$ix."[]\"  class=\"radio2\" $ro value=\"Y\" ".Checkbox_isChecked($rnd['KmsOdo']).">Kilometres";
+		$res .= "<td><input type=\"hidden\" name=\"bikeid[]\" value=\"".$rnd['bikeid']."\"><input  oninput=\"enableSave();\" type=\"text\" name=\"Bike[]\" class=\"vdata shorter\" $ro value=\"".$rnd['Bike']."\" /></td>";
+		$res .= "<td><input  oninput=\"enableSave();\" type=\"text\" name=\"Registration[]\" class=\"vdata shorter\" $ro value=\"".$rnd['Registration']."\" /></td>";
+		$res .= "<td><span class=\"vdata shorter\">";
+		$res .= "<input  oninput=\"enableSave();\" type=\"radio\" name=\"KmsOdo:".$ix."[]\" class=\"radio\" $ro value=\"N\" ".Checkbox_isNotChecked($rnd['KmsOdo'])."> Miles &nbsp;";
+		$res .= "<input  oninput=\"enableSave();\" type=\"radio\" name=\"KmsOdo:".$ix."[]\"  class=\"radio2\" $ro value=\"Y\" ".Checkbox_isChecked($rnd['KmsOdo'])."> Kms";
 		$res .= "</span></td>";
 		$rr = sql_query("SELECT Count(*) AS Rex FROM rides WHERE rides.riderid=".$ride_data['riderid']." and rides.bikeid=".$rnd['bikeid'].andDeleted());
 		$rrd = $rr->fetchArray();
@@ -418,11 +431,11 @@ function show_rider_details_content($ride_data)
 	{
 		$ix++;
 		$res .= "<tr>";
-		$res .= "<td><input  oninput=\"enableSave();\" type=\"hidden\" name=\"bikeid[]\" value=\"newrec\"><input  oninput=\"enableSave();\" type=\"text\" list=\"bikelist\" name=\"Bike[]\" id=\"NewBikeMakeModel\" onchange=\"initBikeMerge();\" class=\"vdata\" $ro placeholder=\"Add another bike here\"/></td>";
-		$res .= "<td><input  oninput=\"enableSave();\" type=\"text\" name=\"Registration[]\" class=\"vdata\" $ro /></td>";
-		$res .= "<td><span class=\"vdata\">";
-		$res .= "<input  oninput=\"enableSave();\" type=\"radio\" name=\"KmsOdo:".$ix."[]\" class=\"radio\" $ro value=\"N\" checked=\"checked\">Miles";
-		$res .= "<input  oninput=\"enableSave();\" type=\"radio\" name=\"KmsOdo:".$ix."[]\"  class=\"radio2\" $ro value=\"Y\" >Kilometres";
+		$res .= "<td><input  oninput=\"enableSave();\" type=\"hidden\" name=\"bikeid[]\" value=\"newrec\"><input  oninput=\"enableSave();\" type=\"text\" list=\"bikelist\" name=\"Bike[]\" id=\"NewBikeMakeModel\" onchange=\"initBikeMerge();\" class=\"vdata shorter\" $ro placeholder=\"Add another bike here\"/></td>";
+		$res .= "<td><input  oninput=\"enableSave();\" type=\"text\" name=\"Registration[]\" class=\"vdata shorter\" $ro /></td>";
+		$res .= "<td><span class=\"vdata shorter\">";
+		$res .= "<input  oninput=\"enableSave();\" type=\"radio\" name=\"KmsOdo:".$ix."[]\" class=\"radio\" $ro value=\"N\" checked=\"checked\"> Miles &nbsp;";
+		$res .= "<input  oninput=\"enableSave();\" type=\"radio\" name=\"KmsOdo:".$ix."[]\"  class=\"radio2\" $ro value=\"Y\" > Kms";
 		$res .= "</span></td>";
 		if ($nbikes > 1)
 			$res .= "<td colspan=\"2\"><input type=\"submit\" name=\"cmd\" title=\"Replace the selected bike records with the single new one\" id=\"MergeBikesButton\" value=\"MergeBikes\"></td>";
@@ -436,7 +449,7 @@ function show_rider_details_content($ride_data)
 
 	
 
-	$rn = sql_query("SELECT * FROM rides WHERE riderid=".$ride_data['riderid'].andDeleted()." ORDER BY DateRideStart DESC");
+	$rn = sql_query("SELECT * FROM rides WHERE riderid=".$bikerider.andDeleted()." ORDER BY DateRideStart DESC");
 	$rows = 0;
 	while($rd=$rn->fetchArray())
 		$rows++;
@@ -473,7 +486,7 @@ function show_rider_details_content($ride_data)
 	$res .= "</div>"; // end tab
 
 	$res .= "<div class=\"tabContent\" id=\"tab_rallies\">";
-	$rn = sql_query("SELECT RallyID,FinishPosition,RallyMiles,RallyPoints,bikes.Bike,recid FROM rallyresults LEFT JOIN bikes ON rallyresults.bikeid=bikes.bikeid WHERE rallyresults.riderid=".$ride_data['riderid']." ");
+	$rn = sql_query("SELECT RallyID,FinishPosition,RallyMiles,RallyPoints,bikes.Bike,recid FROM rallyresults LEFT JOIN bikes ON rallyresults.bikeid=bikes.bikeid WHERE rallyresults.riderid=".$bikerider." ");
 	$rows = 0;
 	while ($rd = $rn->fetchArray())
 		$rows++;
@@ -496,8 +509,8 @@ function show_rider_details_content($ride_data)
 		else
 			$res .= "<tr class=\"row-2 \"";
 		$res .= ">";
-		$res .= "<td><input type=\"hidden\" name=\"Rally_recid[]\" value=\"".$rnd['recid']."\"><input  oninput=\"enableSave();\" type=\"text\" name=\"RallyID[]\" class=\"vdata\" $ro value=\"".$rnd['RallyID']."\"></td>";
-		$res .= "<td><input  oninput=\"enableSave();\" type=\"text\" name=\"Rally_Bike[]\" $ro class=\"vdata\" list=\"bikeslookup\" value=\"".$rnd['Bike']."\"></td>";
+		$res .= "<td><input type=\"hidden\" name=\"Rally_recid[]\" value=\"".$rnd['recid']."\"><input  oninput=\"enableSave();\" type=\"text\" name=\"RallyID[]\" class=\"vdata shorter\" $ro value=\"".$rnd['RallyID']."\"></td>";
+		$res .= "<td><input  oninput=\"enableSave();\" type=\"text\" name=\"Rally_Bike[]\" $ro class=\"vdata shorter\" list=\"bikeslookup\" value=\"".$rnd['Bike']."\"></td>";
 		$res .= "<td><input  oninput=\"enableSave();\" type=\"number\" name=\"FinishPosition[]\" $ro class=\"vdata short\" value=\"".$rnd['FinishPosition']."\"></td>";
 		$res .= "<td><input  oninput=\"enableSave();\" type=\"number\" name=\"RallyMiles[]\" $ro class=\"vdata short\" value=\"".$rnd['RallyMiles']."\"></td>";
 		$res .= "<td><input  oninput=\"enableSave();\" type=\"number\" name=\"RallyPoints[]\" $ro class=\"vdata short\" value=\"".$rnd['RallyPoints']."\"></td>";
@@ -509,8 +522,8 @@ function show_rider_details_content($ride_data)
 	else
 		$res .= "<tr class=\"row-2 \"";
 	$res .= ">";
-	$res .= "<td><input type=\"hidden\" name=\"Rally_recid[]\" value=\"newrec\"><input type=\"text\" placeholder=\"new rally result\" name=\"RallyID[]\" class=\"vdata\" $ro value=\"\"></td>";
-	$res .= "<td><input  oninput=\"enableSave();\" type=\"text\" name=\"Rally_Bike[]\" $ro list=\"bikeslookup\" class=\"vdata\" value=\"\"></td>";
+	$res .= "<td><input type=\"hidden\" name=\"Rally_recid[]\" value=\"newrec\"><input type=\"text\" placeholder=\"new rally result\" name=\"RallyID[]\" class=\"vdata shorter\" $ro value=\"\"></td>";
+	$res .= "<td><input  oninput=\"enableSave();\" type=\"text\" name=\"Rally_Bike[]\" $ro list=\"bikeslookup\" class=\"vdata shorter\" value=\"\"></td>";
 	$res .= "<td><input  oninput=\"enableSave();\" type=\"number\" name=\"FinishPosition[]\" $ro class=\"vdata short\" value=\"\"></td>";
 	$res .= "<td><input  oninput=\"enableSave();\" type=\"number\" name=\"RallyMiles[]\" $ro class=\"vdata short\" value=\"\"></td>";
 	$res .= "<td><input  oninput=\"enableSave();\" type=\"number\" name=\"RallyPoints[]\" $ro class=\"vdata short\" value=\"\"></td>";
@@ -520,7 +533,7 @@ function show_rider_details_content($ride_data)
 	$res .= "</div>";
 	
 	$res .= "<div class=\"tabContent\" id=\"tab_mileeater\">";
-	$rn = sql_query("SELECT * FROM mileeaters WHERE riderid=".$ride_data['riderid'].andDeleted()." ORDER BY awardyear");
+	$rn = sql_query("SELECT * FROM mileeaters WHERE riderid=".$bikerider.andDeleted()." ORDER BY awardyear");
 	$rows = 0;
 	while ($rd = $rn->fetchArray())
 		$rows++;
@@ -683,6 +696,7 @@ function showNewRider()
 	$OK = ($_SESSION['ACCESSLEVEL'] >= $GLOBALS['ACCESSLEVEL_UPDATE']);
 	if (!$OK) safe_default_action();
 	
+	$rd = defaultRecord('riders');
 	$rd['URI'] = 'newrec';
 	$rd['Country'] = 'UK';
 	$rd['CurrentMember'] = 'Y';

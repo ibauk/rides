@@ -2,7 +2,9 @@
 /*
  * I B A U K - publicrr.php
  *
- * Copyright (c) 2019 Bob Stammers
+ * Copyright (c) 2020 Bob Stammers
+ * 
+ * SQLite version
  *
  * Rally results
  */
@@ -10,7 +12,7 @@
 require_once("general.conf.php");
 require_once("db.conf.php");
 
-$PUBLIC_RIDES_SQL  = "SELECT SQL_CALC_FOUND_ROWS RallyID,FinishPosition,RallyMiles,RallyPoints,Rider_Name,IfNull(Bike,'&nbsp;') As Bike FROM rallyresults LEFT JOIN riders ON rallyresults.riderid=riders.riderid LEFT JOIN bikes ON rallyresults.bikeid=bikes.bikeid ORDER BY 1 DESC,2";
+$PUBLIC_RIDES_SQL  = "SELECT RallyID,FinishPosition,RallyMiles,RallyPoints,Rider_Name,IfNull(Bike,'&nbsp;') As Bike FROM rallyresults LEFT JOIN riders ON rallyresults.riderid=riders.riderid LEFT JOIN bikes ON rallyresults.bikeid=bikes.bikeid ORDER BY 1 DESC,2";
 
 
 ?>
@@ -79,7 +81,7 @@ $(document).ready(function() {
 	$rs = sql_query($SQL);
 	while (true)
 	{
-		$rd = mysqli_fetch_assoc($rs);
+		$rd = $rs->fetchArray(SQLITE3_ASSOC);
 		if ($rd == false) break;
 		
 		echo("<tr>");

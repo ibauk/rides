@@ -16,7 +16,7 @@ require_once("serverstatus.php");
 $APPLICATION_TITLE = "IBAUK Rides Database ($serverstatus)";
 $PUBLIC_TITLE = "IBAUK Roll of Honour";
 
-$APPLICATION_VERSION = "2.11";
+$APPLICATION_VERSION = "2.12";
 // 2.0  01SEP16 Initial PHP release
 // 2.1	20OCT16	Live release
 // 2.2	04DEC16 Highlighting non-UK rides; defaults for non-UK rides; extra tooltips
@@ -29,6 +29,7 @@ $APPLICATION_VERSION = "2.11";
 // 2.9	13SEP17 Download CSV on searches + rider reports
 // 2.10	14JUN18	Current/Lapsed member status + RBLR imports
 // 2.11 21AUG20 Recode for SQLite, Code overhaul
+// 2.12	28SEP20	Refactor import routines
 
 $APPLICATION_COPYRIGHT = "Copyright &copy; 2020 Bob Stammers on behalf of Iron Butt UK";
 
@@ -312,6 +313,7 @@ if ($_SESSION['ACCESSLEVEL'] >= $GLOBALS['ACCESSLEVEL_READONLY'] )
 	{
         echo("<li><a href=\"#\" >".$MYKEYWORDS['rallies']."</a> ");
 		echo("<ul id=\"ralliesmenu\" class=\"dropdown\">");
+		echo('<li><a href="index.php?c=ralliestab">Table maintenance</a></li>');
 		$rr = sql_query("SELECT * FROM rallies ORDER BY RallyID");
 		while(True)
 		{
@@ -479,4 +481,25 @@ function touchRider($riderid)
 	sql_query($sql);
 }
 
+
+function resetBulkimports()
+// This will establish an empty BULKIMPORTS table ready for fresh data
+{
+
+	// Don't empty it, drop it altogether
+	$sql = "DROP TABLE IF EXISTS bulkimports; ";
+	//echo('<hr>'.$sql);
+	sql_query($sql);
+
+	$sql = "CREATE TABLE `bulkimports` ";
+	$sql .= "(`recid` INTEGER NOT NULL , `EventID` TEXT , `rider_name` TEXT , `IBA_number` TEXT , `is_pillion` INTEGER DEFAULT 0 ";
+	$sql .= ", `Country` TEXT , `Bike` TEXT , `BikeReg` TEXT , `ridestars` TEXT , `route_number` TEXT DEFAULT '1001' ";
+	$sql .= ", `riderid` INTEGER , `bikeid` INTEGER , `points` INTEGER DEFAULT 0 , `miles` INTEGER DEFAULT 0 , `finishposition` INTEGER DEFAULT 0 ";
+	$sql .= ", `ride_rally` INTEGER DEFAULT 0 , `ridedate` TEXT , `Email` TEXT , `Postal_Address` TEXT , `Postcode` TEXT , `Phone` TEXT ";
+	$sql .= ", Bollox TEXT";
+	$sql .= ", `AltPhone` TEXT , PRIMARY KEY (`recid`) )";
+	//echo('<hr>'.$sql);
+	sql_query($sql);
+	
+}
 ?>

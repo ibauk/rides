@@ -308,7 +308,7 @@ function update_ridetype()
 		$sql .= ",".intval($_REQUEST['MaxHours']);
 		$sql .= ",'".safesql($_REQUEST['HdrImg'])."'";
 		$sql .= ",'".safesql($_REQUEST['TemplateID'])."'";
-		$sql .= ",'".safesql($_REQUEST['Deleted'])."'";
+		$sql .= ",'".safesql($_REQUEST['deletethisrec'])."'";
 		$sql .= ",".intval($_REQUEST['MilesKms']);
 		$sql .= ",".intval($_REQUEST['MinDistance']);
 		$sql .= ")";
@@ -321,7 +321,7 @@ function update_ridetype()
 		$sql .= ",MaxHours=".intval($_REQUEST['IBA_Ride']);
 		$sql .= ",HdrImg='".safesql($_REQUEST['HdrImg'])."'";
 		$sql .= ",TemplateID='".safesql($_REQUEST['TemplateID'])."'";
-		$sql .= ",Deleted='".safesql($_REQUEST['Deleted'])."'";
+		$sql .= ",Deleted='".safesql($_REQUEST['deletethisrec'])."'";
 		$sql .= ",MilesKms=".intval($_REQUEST['MilesKms']);
 		$sql .= ",MinDistance=".intval($_REQUEST['MinDistance']);
 		$sql .= " WHERE recid=".$_REQUEST['recid'];

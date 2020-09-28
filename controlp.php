@@ -40,7 +40,7 @@ EOT;
 
     start_html("About ".application_title());
     echo("<h2>".application_title()." version ".$GLOBALS['APPLICATION_VERSION']."</h2>\n");
-
+	error_log('Starting about');
 	$OK = ($_SESSION['ACCESSLEVEL'] >= $GLOBALS['ACCESSLEVEL_READONLY']);
 	if (!$OK)
 	{
@@ -85,13 +85,16 @@ EOT;
 </div>
 <div class="tabContent" id="tab_environment">
 <?php	
+	error_log('Gettin uname');
 	$servername = php_uname('n');
+	error_log('uname got');
 	$serveraddr = $_SERVER['SERVER_ADDR'];
 	if ($serveraddr=='')
 		$serveraddr = $_SERVER['LOCAL_ADDR'];
 	//var_dump($_SERVER);
-	$mysqlname = "sqlite"; //strtok(mysqli_get_host_info($db_ibauk_conn)," ");
+	$mysqlname = "localhost"; //strtok(mysqli_get_host_info($db_ibauk_conn)," ");
 	$mysqladdr = gethostbyname($mysqlname);
+	error_log('hostname got');
 	if (strtoupper($mysqlname)=='LOCALHOST' and $serveraddr=='127.0.0.1')
 		$mysqlname = $servername;
 

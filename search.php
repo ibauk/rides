@@ -359,7 +359,7 @@ function reportSearchResults()
 	if ($KEY_FIND != '')
 	{
 		if ($res != '') $res .= '; ';
-		$res .= "I was looking for <span class=\"errordata\">\"".$KEY_FIND."\"</span>".searchDatesDescription();
+		$res .= "I was looking for <span class=\"searchkey\">\"".$KEY_FIND."\"</span>".searchDatesDescription();
 	}
 	else if ($_REQUEST['parRideDates'] != 'all')
 	{
@@ -372,7 +372,7 @@ function reportSearchResults()
 			$res .= '; ';
 		else
 			$res = "I was looking for ";
-		$res .= "<span class=\"errordata\">".$_REQUEST['likefld']." matching '".htmlentities($_REQUEST['likeval'])."'</span>";
+		$res .= "<span class=\"searchkey\">".$_REQUEST['likefld']." matching '".htmlentities($_REQUEST['likeval'])."'</span>";
 	}
 	if ($_REQUEST['parRideValidation'] == 'UK')
 	{
@@ -380,7 +380,7 @@ function reportSearchResults()
 			$res .= '; ';
 		else
 			$res = "I was looking for ";
-		$res .= "<span class=\"errordata\">UK validated rides only</span>";
+		$res .= "<span class=\"searchkey\">UK validated rides only</span>";
 	}
 	return $res;
 }

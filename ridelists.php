@@ -66,7 +66,7 @@ function show_rides_table($where,$caption,$colselection)
     global $CMDWORDS;
 	global $KEY_ORDER, $KEY_DESC, $PAGESIZE, $OFFSET, $SHOWALL;
 
-	$RIDES_SQL  = "SELECT *,(NameOnCertificate || ' ' || NullIf(RideStars,'')) As RoH_Name FROM rides LEFT JOIN riders ON rides.riderid=riders.riderid LEFT JOIN bikes ON rides.bikeid=bikes.bikeid ";
+	$RIDES_SQL  = "SELECT *,(NameOnCertificate || ' ' || Coalesce(RideStars,'')) As RoH_Name FROM rides LEFT JOIN riders ON rides.riderid=riders.riderid LEFT JOIN bikes ON rides.bikeid=bikes.bikeid ";
 	
 	$OK = ($_SESSION['ACCESSLEVEL'] >= $GLOBALS['ACCESSLEVEL_READONLY']);
 	

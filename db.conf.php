@@ -65,6 +65,9 @@ function sql_query($sql,$DontLogThis=FALSE)
 			}
 
 		}
+		$lc = $db_ibauk_conn->lastErrorCode();
+		if ($lc != 0 && FALSE)
+			echo("<hr>GOT $lc (".$db_ibauk_conn->lastErrorMsg()." - $sql");
 	} catch(exception $err) {
 	 	echo('<hr /><p class=\"errormsg\">ERROR: '.$err->getMessage().'</p></hr />'.$sql.'<hr />');
 	}
@@ -259,7 +262,7 @@ function dump_table_sql($table)
 function getValueFromDB($sql,$col,$defval)
 {
 	$r = sql_query($sql);
-	if ($rd = $r->fetchArray())
+	if ($r && $rd = $r->fetchArray())
 		return $rd[$col];
 	else
 		return $defval;

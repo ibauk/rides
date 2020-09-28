@@ -94,6 +94,7 @@ function bodyLoaded()
 
 	
 // Grab the tab links and content divs from the page
+try {
       var tabListItems = document.getElementById('tabs').childNodes;
       for ( var i = 0; i < tabListItems.length; i++ ) {
         if ( tabListItems[i].nodeName == "LI" ) {
@@ -102,7 +103,10 @@ function bodyLoaded()
           tabLinks[id] = tabLink;
           contentDivs[id] = document.getElementById( id );
         }
-      }
+	  }
+} catch(x) {
+	return;
+}
 
       // Assign onclick events to the tab links, and
       // highlight the first tab
@@ -217,8 +221,8 @@ function reflectCertOrigin()
 	 * foreign verifications - affects ride display only
 	 *
 	 */
-	 var foreignColor = "red";
-	 var localColor = "lightgray";
+	 var foreignColor = "var(--form-foreign)";
+	 var localColor = "var(--form-background)";
 	 var xForeignCert = document.getElementById('foreignCert').checked;
 	 var xDiv = document.getElementById('tab_ibadata');
 	 if (!xDiv) return;
@@ -276,7 +280,7 @@ function setCertificateName(obj)
 function doPaymentReceived()
 {
 	/* Called when DatePayRcvd is updated */
-	document.getElementById('DateCertSent').value = document.getElementById('DatePayRcvd').value;
+	//document.getElementById('DateCertSent').value = document.getElementById('DatePayRcvd').value;
 	document.getElementById("publishRoH").checked = document.getElementById('DoWantCertificate').checked;
 
 }

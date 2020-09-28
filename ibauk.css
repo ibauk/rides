@@ -6,8 +6,31 @@
  * 
  */
 
+
+ @page {
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+:root	{
+		--regular-background		: #d6d6c2;
+    --regular-text				: black;
+    --prominent-background   : #595959;
+    --prominent-text         : white;
+    --hilite-background      : black;
+    --hilite-text            : white;
+    --form-background        : #f8f8ff;
+    --form-text              : black;
+    --form-foreign           : red; /* background used for rides validated elsewhere */
+    --input-background       : white;
+    --input-text             : black;
+
+		
+}
+
 body 				{
-	background-color: #b3f0ff; /*	#fff0b3; */
+  background-color: var(--regular-background);
+  color: var(--regular-text);
 	font-family:		Verdana, Arial;
 	font-size: 			12pt;
 	margin: 			1em;
@@ -27,20 +50,43 @@ a:visited 			{color: #0000ff;}
 a:active 			{color: #FF0000;}
 a:hover 				{ text-transform: uppercase; font-weight: bold; }
 a 					{text-decoration: none;}
+h1 a:link				{color: var(--regular-text);}
+h1 a:visited 			{color: var(--regular-text);}
 
 .topmenu			{ border-bottom: solid medium #bb0000; padding-bottom: 2px; }
 
-p 					{ font-family: Verdana, Arial, Helvetica; font-size: 10pt }
+p 					{ font-family: Verdana, Arial, Helvetica; font-size: .9em; }
 p.center			{ text-align: center }
-address 				{ font-family: Verdana, Arial, Helvetica; font-size: 8pt }
-span.x				{ font-family: Verdana, Arial, Helvetica; font-size: 10pt; }
+address 				{ font-family: Verdana, Arial, Helvetica; font-size: .8em; }
+span.x				{ font-family: Verdana, Arial, Helvetica; font-size: .9em; }
 
-td 					{ font-family: Verdana, Arial, Helvetica;  padding: 4px; text-align: left }
+.scrollable td, .scrollable th 	{ 
+          box-sizing: border-box;
+          font-family: Verdana, Arial, Helvetica;  
+          min-height: 1em;
+          border : 2px solid darkgray;
+          vertical-align: middle; 
+}
+.scrollable th { display: inline-block; margin-left: 1px; margin-right: 2px; }
+
+.scrollable input { box-sizing: border-box; width: 100%; }
+.cellRecid    { width: 4em; }
+.cellName     { width: 15em; }
+.cellRP       { width: 3em; }
+.cellBike     { width: 15em; }
+.cellReg      { width: 7em; }
+.cellStars    { width: 5em; }
+.cellRoute    { width: 5em; text-align: center; }
+.cellPoints   { width: 5em; }
+.cellMiles    { width: 5em; }
+.cellRank     { width: 5em; text-align: center; }
+.cellDrop     { width: 5em; }
+
 span.print			{ font-size: 8pt; }
 
-span.required 		{ font-size: 8pt; color: #bb0000; }
-span.small 			{ font-size: 8pt }
-span.pagetitle		{ font-size: 12pt; font-weight: bold; text-align: center }
+span.required 		{ font-size: .8em; color: #bb0000; }
+span.small 			{ font-size: .8em; }
+span.pagetitle		{ font-size: 1em; font-weight: bold; text-align: center }
 span.bold			{ font-weight: bold; }
 span.italic			{ font-style: italic; }
 
@@ -62,8 +108,8 @@ td.col-2				{ background-color: #e8e8e8; }
 td.form-title		{ background-color: #ffffff; font-weight: bold; }
 td.nopad				{ padding: 0px; }
 td.spacer			{ background-color: #ffffff; font-size: 1pt; line-height: 0.1; }
-td.small-caption		{ font-size: 8pt; }
-td.print				{ font-size: 8pt; text-align: center; }
+td.small-caption		{ font-size: .8em; }
+td.print				{ font-size: .8em; text-align: center; }
 td.date				{ min-width: 6em; }
 td.ourbox			{ max-width: 150px; }
 td.location			{ max-width: 200px; }
@@ -77,7 +123,7 @@ tr.row-2				{ background-color: #e8e8e8; }
 tr.row-1:hover,
 tr.row-2:hover		{ background-color: red; }
 */
-tr.goto:hover				{ background-color: red; }
+tr.goto:hover				{ background-color: var(--hilite-background); color: var(--hilite-text); }
 tr.spacer			{ background-color: #ffffff; }
 tr.row-category		{ background-color: #c8c8e8; font-weight: bold; }
 
@@ -99,7 +145,7 @@ td.quick-summary-right	{ width: 50%; text-align: right; }
 td.news-heading		{ background-color: #d8d8d8; text-align: left; border-bottom: 1px solid #000000; }
 td.news-body			{ background-color: #ffffff; padding: 16px; }
 span.news-headline	{ font-weight: bold; }
-span.news-date		{ font-style: italic; font-size: 8pt; }
+span.news-date		{ font-style: italic; font-size: .8em; }
 
 
 th                  			{ text-align: left; padding: 2px; vertical-align: bottom;}
@@ -113,6 +159,10 @@ h1                  			{ text-align: center; text-transform:uppercase; vertical-
 .number             		{ text-align: right; }
 .ourbox             		{ font-weight: bold; color: #bb0000; }
 .sorry				{ text-align: center; font-weight: bold; font-size: larger;}
+
+.searchkey  { background-color: var(--prominent-background); color: var(--prominent-text); font-weight: bold; font-size: larger; padding: 1em;}
+
+
 em					{ font-style: italic; font-size: larger;}
 
 @media print {
@@ -125,7 +175,7 @@ div.maindata		{ margin-left: auto; margin-right: auto; max-width: 1024px; }
 /* Ride details form */
 div.detailform	{ margin-left: auto; margin-right: auto;  max-width: 1000px; }
 div.riderform	{ margin-left: auto; margin-right: auto;  max-width: 830px; }
-.boldlabel		{ padding: 0 0 0 1.5em; text-align: center; vertical-align: middle; font-size: 1.2em; font-weight: bold; }
+.boldlabel		{  font-size: 1.2em; font-weight: bold; }
 .vspan  {
   display: inline-block;
   vertical-align: middle;
@@ -138,16 +188,20 @@ div.riderform	{ margin-left: auto; margin-right: auto;  max-width: 830px; }
 .vdata			{ 
   display: inline-block; 
   padding: 2px; 
-  width: 12em; 
+  width: 20em; 
   min-height: 1em; 
   text-align: left; 
   border: 2px solid darkgray; 
-  background-color: #d8d8d8; 
+  background-color: var(--input-background); 
+  color: var(--input-text); 
   font-weight: bold; 
   /*margin-bottom: .5em; */
   vertical-align: middle; 
 }
 .short			{ width: 6em; }
+.shorter    { width: 12em; }
+
+input, textarea       { background-color: var(--input-background); color: var(--input-text); }
 
 input:read-only,textarea:read-only	{ border: none; margin-left: 2px; }
 .radio			{ display: inline-block; padding: 2px 12px 2px 20px; min-height: 1em; text-align: left;  font-weight: bold; margin-bottom: .5em; vertical-align: top; }
@@ -159,7 +213,7 @@ input:read-only,textarea:read-only	{ border: none; margin-left: 2px; }
 fieldset			{ display: inline-block; margin-left: 105px; max-width: 250px; margin-bottom: 1.0em; padding-bottom: 3px;  border: 2px solid darkgray; background-color: #d8d8d8;}
 legend			{ padding: 0.5em;  border: 2px solid darkgray; background-color: lightgray;}
 
-[name="IBA_Number"]		{ width:5em; }
+[name="IBA_Number"]		{ width:6em; }
 
 input[type="tel"] { width:10em; }
 input[type="date"] { width:10em;  }
@@ -174,7 +228,7 @@ input[type="radio"].readonly {
 .goto			{ cursor:pointer; }
 /* Tabbed interface */
 ul#tabs { list-style-type: none; margin: 30px 0 0 0; padding: 0 0 0.3em 0; }
-ul#tabs li { display: inline; }
+ul#tabs li { display: inline;  }
 ul#tabs li a { color: #42454a; background-color: #dedbde; border: 1px solid #c9c3ba; border-bottom: none; padding: 0.3em; text-decoration: none; 
 
     background:      -o-linear-gradient(top, #ECECEC 50%, #D1D1D1 100%);
@@ -186,20 +240,30 @@ ul#tabs li a { color: #42454a; background-color: #dedbde; border: 1px solid #c9c
     text-shadow: 0 1px #FFF;
     margin: 0 5px;
     padding: 0 2px;
-
+    border-top-left-radius: 5px; border-top-right-radius: 5px;
 
 
 }
 ul#tabs li a:hover { background-color: #f1f0ee; }
 ul#tabs li a.selected { color: #000; background-color: #f1f0ee; font-weight: bold; padding: 0.7em 0.3em 0.38em 0.3em; }
-div.tabContent { border: 10px solid #c9c3ba;  padding: 0.5em;  display:inherit; max-width: 90em; background-color: lightgray;}
+div.tabContent { border: 10px solid #c9c3ba;  padding: 0.5em;  display:inherit; max-width: 90em; background-color: var(--form-background); color: var(--form-text);}
 div.tabContenthide { display: none; }
 
 caption			{ font-size: 1.2em; font-weight: bold; }
-#CurrentRideStatus	{ font-size: 1.1em; margin-left: 2em; background-color: blue; color: white; white-space: nowrap; padding-left: .5em; padding-right: .5em; }
+#CurrentRideStatus	{ font-size: 1.1em; margin-left: 2em; background-color: var(--prominent-background); color: var(--prominent-text); white-space: nowrap; padding-left: .5em; padding-right: .5em; }
 
 #searchform fieldset	{ margin-left: 2px; max-width: 2048px; }
+
 
 .indicator  { text-transform: lowercase; }
 .indicator.checked  { text-transform: uppercase; }
 
+fieldset.publicform	{ 
+    display: inline-block; 
+    margin-left: 105px; 
+    max-width: 100%;
+    margin-bottom: 1.0em; 
+    padding-bottom: 1em;  
+    border: 2px solid darkgray; 
+    background-color: #d8d8d8;
+  }

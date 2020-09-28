@@ -59,6 +59,9 @@ switch (strtoupper($cmd))
 	case 'DBEXPORT':
 		include("dbexport.php");
 		exit;
+	case 'IMPORT':
+		include('importer.php');
+		exit;
 	case 'BIKESMM':
 		include('bikes.php');
 		show_bikes_listing();
@@ -193,6 +196,13 @@ switch (strtoupper($cmd))
 		exit;
 	case 'STARTIMPORT':
 		include('manageimports.php');
+		exit;
+	case 'PUBLICAUTH':
+		include('publicauth.php');
+		exit;
+	case 'RALLIESTAB':
+		include('rallies.php');
+		edit_rallies_table();
 		exit;
     default:
 		break;

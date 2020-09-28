@@ -4,11 +4,15 @@
  *
  * This is the SQLITE version
  * 
+ * Upgraded to PhpSpreadsheet
  * 
  * Copyright (c) 2020 Bob Stammers
  *
  */
 
+$IMPORTSPEC['xlsname']  = 'import.csv';
+$IMPORTSPEC['firstdatarow'] = 2;
+$IMPORTSPEC['cols']['routes'] = [];
  
 if (!isset($db_ibauk_conn)) {
 	die("I cannot be called directly!");
@@ -17,12 +21,14 @@ if (!isset($db_ibauk_conn)) {
 $OK = ($_SESSION['ACCESSLEVEL'] >= $GLOBALS['ACCESSLEVEL_READONLY']);
 if (!$OK) safe_default_action();
 
-$debuglog = true;
+$debuglog = false;
 
 $target_dir = __DIR__ . "/public/uploads/";
 
-require_once './PHPExcel/Classes/PHPExcel/IOFactory.php';
+require_once("vendor\autoload.php");
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 require_once './includespec.php';
+include "loadimports.php";
 
 start_html("Loading data");
 
@@ -32,41 +38,42 @@ if (!isset($IMPORTSPEC['xlsname']))
 
 if ($debuglog) echo("Opening ".$IMPORTSPEC['xlsname']."<br />");
 try {
-	$xlstype = PHPExcel_IOFactory::identify($target_dir.$IMPORTSPEC['xlsname']);
-} catch (Exception $e) {
-	show_infoline("Error: ".$e->getMessage(),'errormsg');
+	$xlstype = \PhpOffice\PhpSpreadsheet\IOFactory::identify($target_dir.$IMPORTSPEC['xlsname']);
+} catch (Exception $e) {show_infoline("Error: ".$e->getMessage(),'errormsg');
 }
 
-$rdr = PHPExcel_IOFactory::createReader($xlstype); 
+$rdr = \PhpOffice\PhpSpreadsheet\IOFactory::createReader($xlstype); 
 $rdr->setReadDataOnly(true);
 $rdr->setLoadSheetsOnly($IMPORTSPEC['whichsheet']);
 
 $xls = $rdr->load($target_dir.$IMPORTSPEC['xlsname']);
 
-$sheet = $xls->getSheet();
+$sheet = $xls->getSheet($IMPORTSPEC['whichsheet']);
 	
-$row = 2;  // Skip the column headers
+$row = $IMPORTSPEC['firstdatarow'];  // Skip the column headers
 $nrows = 0;
 $npillions = 0;
 
 echo("<p>Importing data from <strong>".$IMPORTSPEC['xlsname']."</strong></p>");
 
+
 $sql = "SELECT Count(*) AS Rex FROM bulkimports";
-$r = sql_query($sql);
-$rr = $r->fetchArray();
-if ($rr['Rex'] > 0) {
+$rex = getValueFromDB($sql,"Rex",0);
+if ($rex > 0) {
 	if (!isset($_REQUEST['force'])) {
 		show_infoline("The import table is not empty, please fix and retry","errormsg");
 		exit;
 	}
 }
-sql_query("TRUNCATE bulkimports");
+
+resetBulkimports();
 if ($IMPORTSPEC['ridedate']=='')
 	$IMPORTSPEC['ridedate'] = date("Y-m-d"); // So it's a valid date in the SQL query
-
+sql_query('BEGIN');
 while (true) {
+	if ($debuglog) error_log('record '.$nrows);
 	try {
-		if ($debuglog) echo('[cols][ridername]='.$IMPORTSPEC['cols']['ridername']);
+		//if ($debuglog) echo('[cols][ridername]='.$IMPORTSPEC['cols']['ridername']);
 		if (isset($IMPORTSPEC['cols']['ridername'])) {
 			$rider_name = $sheet->getCellByColumnAndRow($IMPORTSPEC['cols']['ridername'],$row)->getValue();
 		} elseif (isset($IMPORTSPEC['cols']['firstname']) && isset($IMPORTSPEC['cols']['lastname'])) {
@@ -75,11 +82,22 @@ while (true) {
 			$rider_name = '';
 		}
 		
-		if ($debuglog) echo("Rider $rider_name");
 		if (trim($rider_name)=='') 
 			break;
+		if ($debuglog) echo("Rider :$rider_name:");
 		$nrows++;
 		
+		if (isset($IMPORTSPEC['cols']['RiderIBA'])) {
+			$RiderIBA = $sheet->getCellByColumnAndRow($IMPORTSPEC['cols']['RiderIBA'],$row)->getValue();
+		} else {
+			$RiderIBA = '';
+		}
+		if (isset($IMPORTSPEC['cols']['PillionIBA'])) {
+			$PillionIBA = $sheet->getCellByColumnAndRow($IMPORTSPEC['cols']['PillionIBA'],$row)->getValue();
+		} else {
+			$PillionIBA = '';
+		}
+
 		if (isset($IMPORTSPEC['cols']['bike'])) {
 			$bike = $sheet->getCellByColumnAndRow($IMPORTSPEC['cols']['bike'],$row)->getValue();
 		} elseif (isset($IMPORTSPEC['cols']['make']) && isset($IMPORTSPEC['cols']['model'])) {
@@ -89,9 +107,14 @@ while (true) {
 		}
 		if ($debuglog) echo(" Bike: $bike");
 		
+		if (isset($IMPORTSPEC['cols']['BikeReg'])) {
+			$BikeReg = $sheet->getCellByColumnAndRow($IMPORTSPEC['cols']['BikeReg'],$row)->getValue();
+		} else {
+			$BikeReg = '';
+		}
 		// This chooses a route based on which spreadsheet column is not blank
 		$route = '';
-		if (isset($IMPORTSPEC['cols']['routes'])) {
+		if (isset($IMPORTSPEC['cols']['routes']) && is_array($IMPORTSPEC['cols']['routes'])) {
 			foreach ($IMPORTSPEC['cols']['routes'] as $routenumber => $col) {
 				if ($sheet->getCellByColumnAndRow($col,$row) <> '') {
 					$route = $routenumber;
@@ -153,13 +176,13 @@ while (true) {
 
 		
 		//if ($debuglog) echo(" route: $route");
-		$sql = "INSERT INTO bulkimports (ride_rally,EventID,rider_name,is_pillion,Bike,route_number,ridestars";
+		$sql = "INSERT INTO bulkimports (ride_rally,EventID,rider_name,IBA_Number,is_pillion,Bike,BikeReg,route_number,ridestars";
 		$sql .= ",finishposition,points,miles,ridedate";
 		$sql .= ",Email,Postal_Address,Postcode,Phone,AltPhone";
 		$sql .= ") VALUES (";
 		$sql .= $IMPORTSPEC['ride_rally'];
 		$sql .= ",'".safesql(trim($IMPORTSPEC['eventid']))."'";
-		$sql .= ",'".safesql(trim($rider_name))."',0,'".safesql(trim($bike))."','".safesql(trim($route))."','".safesql(trim($ridestars))."'";
+		$sql .= ",'".safesql(trim($rider_name))."','".$RiderIBA."',0,'".safesql(trim($bike))."','".safesql(trim($BikeReg))."','".safesql(trim($route))."','".safesql(trim($ridestars))."'";
 		$sql .= ",$placing,$points,$miles";
 		$sql .= ",'".$IMPORTSPEC['ridedate']."'";
 		$sql .= ",'".safesql($email)."'";
@@ -176,13 +199,13 @@ while (true) {
 			if ($pillion <> '') {
 				if ($debuglog) echo("Pillion: $pillion Bike: $bike");
 				$npillions++;
-				$sql = "INSERT INTO bulkimports (ride_rally,EventID,rider_name,is_pillion,Bike,route_number,ridestars";
+				$sql = "INSERT INTO bulkimports (ride_rally,EventID,rider_name,IBA_Number,is_pillion,Bike,BikeReg,route_number,ridestars";
 				$sql .= ",finishposition,points,miles,ridedate";
 				$sql .= ",Email,Postal_Address,Postcode,Phone,AltPhone";
 				$sql .= ") VALUES (";
 				$sql .= $IMPORTSPEC['ride_rally'];
 				$sql .= ",'".safesql(trim($IMPORTSPEC['eventid']))."'";
-				$sql .= ",'".safesql(trim($pillion))."',1,'".safesql(trim($bike))."','".safesql(trim($route))."','".safesql(trim($ridestars))."'";
+				$sql .= ",'".safesql(trim($pillion))."','".$PillionIBA."',1,'".safesql(trim($bike))."','".safesql(trim($BikeReg))."','".safesql(trim($route))."','".safesql(trim($ridestars))."'";
 				$sql .= ",$placing,$points,$miles";
 				$sql .= ",'".$IMPORTSPEC['ridedate']."'";
 				$sql .= ",'".safesql($email)."'";
@@ -202,8 +225,8 @@ while (true) {
 	}
 	$row++;
 }
+if ($debuglog) error_log('done');
 echo("<p>All done - $nrows rows loaded; $npillions pillions</p>");
- 
-include "loadimports.php";
+sql_query("COMMIT"); 
 show_imports();
 ?>

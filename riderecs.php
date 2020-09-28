@@ -11,7 +11,7 @@
  * 2017-09	Fixed rides.Kmsodo + wrong bike updating
  */
 
-$RIDES_SQL  = "SELECT  *, rides.Deleted as RideDeleted, rides.IsPillion as PillionRide, rides.KmsOdo as KmsOdo FROM rides LEFT JOIN riders ON rides.riderid=riders.riderid LEFT JOIN bikes ON rides.bikeid=bikes.bikeid ";
+$RIDES_SQL  = "SELECT  *, rides.Deleted as RideDeleted, rides.IsPillion as IsPillion, rides.KmsOdo as KmsOdo FROM rides LEFT JOIN riders ON rides.riderid=riders.riderid LEFT JOIN bikes ON rides.bikeid=bikes.bikeid ";
 
 
 
@@ -50,7 +50,7 @@ function show_ride_details_content($ride_data)
 	if ($ride_data['URI'] == 'newrec')
 		$res .= "<h2>Entering new ride details for <span class=\"boldlabel\">".$ride_data['Rider_Name']."</span>";
 	else
-		$res .= "<h2 title=\"Unique Ride Identifier\">Ride record for URI <span class=\"boldlabel\">".$ride_data['URI']."</span>";
+		$res .= "<h2 title=\"Unique Ride Identifier\">Ride record for URI ".$ride_data['URI'];
 	
 
 	$sx = "Received, not acknowledged\n";
@@ -84,13 +84,13 @@ function show_ride_details_content($ride_data)
 	else
 		$onc = '';	
 	$res .= "<label for=\"Rider_Name\" class=\"vlabel3\">Rider name</label> ";
-	$res .= "<input $onc type=\"text\" name=\"Rider_Name\" id=\"Rider_Name\" class=\"vdata\" $de value=\"".$ride_data['Rider_Name']."\" />";
-	$res .= "<label for=\"NameOnCertificate\" class=\"vlabel3\">Name  (certificate)</label><input type=\"text\" name=\"NameOnCertificate\" id=\"NameOnCertificate\" class=\"vdata\" $ro value=\"".$ride_data['NameOnCertificate']."\" />";
+	$res .= "<input $onc type=\"text\" name=\"Rider_Name\" id=\"Rider_Name\" class=\"vdata shorter\" $de value=\"".$ride_data['Rider_Name']."\" />";
+	$res .= "<label for=\"NameOnCertificate\" class=\"vlabel3\">Name  (certificate)</label><input type=\"text\" name=\"NameOnCertificate\" id=\"NameOnCertificate\" class=\"vdata shorter\" $ro value=\"".$ride_data['NameOnCertificate']."\" />";
 	$res .= '</div>';
 
 	$res .= '<div class="vspan">';
 	$res .= "<label for=\"Postal_Address\" class=\"vlabel3\">Postal address</label><textarea name=\"Postal_Address\" id=\"Postal_Address\" $ro class=\"vdata tall\" >".$ride_data['Postal_Address']."</textarea>";
-	$res .= "<label for=\"RideStars\" class=\"vlabel3\">RideStars</label><input placeholder=\"What's special?\" tabindex=\"-1\" type=\"text\" name=\"RideStars\" id=\"RideStars\" class=\"vdata\" title=\"What's significant about the rider/pillion on this ride, age?\" $ro value=\"".$ride_data['RideStars']."\" />";
+	$res .= "<label for=\"RideStars\" class=\"vlabel3\">RideStars</label><input placeholder=\"What's special?\" tabindex=\"-1\" type=\"text\" name=\"RideStars\" id=\"RideStars\" class=\"vdata short\" title=\"What's significant about the rider/pillion on this ride, age?\" $ro value=\"".$ride_data['RideStars']."\" />";
 	if ($ride_data['URI'] <> 'newrec')
 	{
 		$res .= "<label for=\"editriderbutton\" class=\"vlabel3\"></label>";
@@ -100,7 +100,7 @@ function show_ride_details_content($ride_data)
 
 
 	$res .= '<div class="vspan">';
-	$res .= "<label for=\"Postcode\" class=\"vlabel3\">Postcode</label><input type=\"text\" name=\"Postcode\" id=\"Postcode\" class=\"vdata\"  $ro value=\"".$ride_data['Postcode']."\" />";
+	$res .= "<label for=\"Postcode\" class=\"vlabel3\">Postcode</label><input type=\"text\" name=\"Postcode\" id=\"Postcode\" class=\"vdata short\"  $ro value=\"".$ride_data['Postcode']."\" />";
 	$em = htmlspecialchars($ride_data['Email']);
 	$res .= "<label for=\"Email\" class=\"vlabel3\">Email</label><input title=\"$em\" type=\"email\" name=\"Email\" id=\"Email\" class=\"vdata\"  $ro value=\"$em\" />";
 	$res .= "<a tabindex=\"-1\" id=\"sendMail\" href=\"mailto:".$ride_data['Email']."\"> $EMAIL_ICON</a>";
@@ -118,12 +118,14 @@ function show_ride_details_content($ride_data)
 	//$res .= "<input autofocus list=\"IBA_Rides\" type=\"text\" name=\"IBA_Ride\" id=\"IBA_Ride\" class=\"vdata\" $ro value=\"".$ride_data['IBA_Ride']."\" />";
 	$res .= "<input type=\"hidden\" name=\"IBA_Ride\" id=\"IBA_Ride\" class=\"vdata\" $ro value=\"".$ride_data['IBA_Ride']."\" />";
 	
-	$res .= "<select autofocus onchange=\"setRideFromRideID();\" name=\"IBA_RideID\" id=\"IBA_RideID\" class=\"vdata\" $ro>";
+	$res .= "<select autofocus onchange=\"setRideFromRideID();\" name=\"IBA_RideID\" id=\"IBA_RideID\" class=\"vdata shorter\" $ro>";
 	
 	$where = "WHERE Deleted='N'";
 	if ($ride_data['URI'] <> 'newrec')
 		$where .= " OR IBA_Ride='".$ride_data['IBA_Ride']."'";
-	$rn = sql_query("SELECT * FROM ridenames $where ORDER BY IBA_Ride");
+	$sql = "SELECT * FROM ridenames $where ORDER BY Lower(IBA_Ride)";
+	error_log($sql);
+	$rn = sql_query($sql);
 	//$res .= "\r\n<datalist id=\"IBA_Rides\">";
 	while(true)
 	{
@@ -150,9 +152,9 @@ function show_ride_details_content($ride_data)
 	$res .= "<input type=\"text\" name=\"EventName\" id=\"EventName\" class=\"vdata\" $ro value=\"".$ride_data['EventName']."\" />";
 	$res .= '</span>';
 	$res .= "<fieldset>";
-	$res .= "<input type=\"radio\" name=\"IsPillion\" class=\"radio\" $disabled value=\"N\" ".Checkbox_isNotChecked($ride_data['PillionRide'])."> Rider";
+	$res .= "<input type=\"radio\" name=\"IsPillion\" class=\"radio\" $disabled value=\"N\" ".Checkbox_isNotChecked($ride_data['IsPillion'])."> Rider";
 	$res .= ' &nbsp;&nbsp; ';
-	$res .= "<input type=\"radio\" name=\"IsPillion\" class=\"radio2\" $disabled value=\"Y\" ".Checkbox_isChecked($ride_data['PillionRide'])."> Pillion";
+	$res .= "<input type=\"radio\" name=\"IsPillion\" class=\"radio2\" $disabled value=\"Y\" ".Checkbox_isChecked($ride_data['IsPillion'])."> Pillion";
 	$res .= "</fieldset>";
 	$res .= '</div>';
 
@@ -160,7 +162,7 @@ function show_ride_details_content($ride_data)
 
 	$res .= '<div class="vspan">';
 	$res .= "<label for=\"BikeChoice\" class=\"vlabel3\">Bike</label>";
-	$res .= "<select  onchange=\"chooseBike();\" $ro id=\"BikeChoice\" name=\"Bike\" class=\"vdata\" $ro >";
+	$res .= "<select  onchange=\"chooseBike();\" $ro id=\"BikeChoice\" name=\"Bike\" class=\"vdata shorter\" $ro >";
 	if ($ride_data['riderid'] <> 'newrec' && $ride_data['riderid'] <> '') {
 		$rn = sql_query("SELECT * FROM bikes WHERE riderid=".$ride_data['riderid']);
 		while(true)	{
@@ -175,8 +177,8 @@ function show_ride_details_content($ride_data)
 	}
 	$res .= "<option $disabled value=\"newrec|\">&lt;new bike&gt;</option>";
 	$res .= "</select> ";
-	$res .= "<input type=\"text\" list=\"bikelist\" placeholder=\"New bike make &amp; model\" class=\"vdata\" id=\"BikeText\" name=\"BikeText\"> ";
-	$res .= "<label for=\"BikeReg\" class=\"vlabel3\">Registration</label><input type=\"text\" id=\"BikeReg\" name=\"Registration\" class=\"vdata\" $ro value=\"".$ride_data['Registration']."\" />";
+	$res .= "<input type=\"text\" list=\"bikelist\" placeholder=\"New bike make &amp; model\" class=\"vdata shorter\" id=\"BikeText\" name=\"BikeText\"> ";
+	$res .= "<label for=\"BikeReg\" class=\"vlabel3\">Registration</label><input type=\"text\" id=\"BikeReg\" name=\"Registration\" class=\"vdata short\" $ro value=\"".$ride_data['Registration']."\" />";
 	$res .= '</div>';
 
 	$res .= '<div class="vspan">';
@@ -207,10 +209,10 @@ function show_ride_details_content($ride_data)
 	$fp = htmlspecialchars($ride_data['FinishPoint']);
 	$res .= "<label for=\"StartPoint\" class=\"vlabel3\">Start point</label><input title=\"$sp\" type=\"text\" name=\"StartPoint\" id=\"StartPoint\" class=\"vdata\" $ro value=\"$sp\" />";
 	$res .= "<label for=\"MidPoints\" class=\"vlabel3\">via</label><input title=\"$vp\" type=\"text\" name=\"MidPoints\" id=\"MidPoints\" class=\"vdata\" $ro value=\"$vp\" />";
-	$res .= "<label for=\"FinishPoint\" class=\"vlabel3\">Finish point</label><input title=\"$fp\"type=\"text\" name=\"FinishPoint\" id=\"FinishPoint\" class=\"vdata\" $ro value=\"$fp\" />";
+	$res .= "<br><br><label for=\"FinishPoint\" class=\"vlabel3\">Finish point</label><input title=\"$fp\"type=\"text\" name=\"FinishPoint\" id=\"FinishPoint\" class=\"vdata\" $ro value=\"$fp\" />";
 	$res .= '</div>';
 	$res .= '<div class="vspan">';
-	$res .= "<label for=\"RiderNotes\" class=\"vlabel3\">Rider notes</label><textarea name=\"RiderNotes\" id=\"RiderNotes\" class=\"vdata tall\" $ro>".$ride_data['RiderNotes']."</textarea>";
+	$res .= "<br><label for=\"RiderNotes\" class=\"vlabel3\">Rider notes</label><textarea name=\"RiderNotes\" id=\"RiderNotes\" class=\"vdata tall\" $ro>".$ride_data['RiderNotes']."</textarea>";
 	$res .= '</div>';
 
 	$res .= "</div>"; // tabContent
@@ -230,13 +232,13 @@ function show_ride_details_content($ride_data)
 
 	$res .= '<div class="vspan">';
 
-	$res .= "<label for=\"TimeStart\" class=\"vlabel3\">Time 1st receipt</label><input type=\"text\" name=\"TimeStart\" id=\"TimeStart\" class=\"vdata\" value=\"".$ride_data['TimeStart']."\" />";
-	$res .= "<label for=\"TimeFinish\" class=\"vlabel3\">Time last receipt</label><input type=\"text\" name=\"TimeFinish\" id=\"TimeFinish\" class=\"vdata\" value=\"".$ride_data['TimeFinish']."\" />";
+	$res .= "<label for=\"TimeStart\" class=\"vlabel3\">Time 1st receipt</label><input type=\"text\" name=\"TimeStart\" id=\"TimeStart\" class=\"vdata short\" value=\"".$ride_data['TimeStart']."\" />";
+	$res .= "<label for=\"TimeFinish\" class=\"vlabel3\">Time last receipt</label><input type=\"text\" name=\"TimeFinish\" id=\"TimeFinish\" class=\"vdata short\" value=\"".$ride_data['TimeFinish']."\" />";
 	$res .= '</div>';
 
 	$res .= '<div class="vspan">';
 
-	$res .= "<br><label for=\"RideVerifier\" class=\"vlabel3\">Verifier</label><input type=\"text\" name=\"RideVerifier\" id=\"RideVerifier\" class=\"vdata\" value=\"".$ride_data['RideVerifier']."\" />";
+	$res .= "<br><label for=\"RideVerifier\" class=\"vlabel3\">Verifier</label><input type=\"text\" name=\"RideVerifier\" id=\"RideVerifier\" class=\"vdata shorter\" value=\"".$ride_data['RideVerifier']."\" />";
 	$res .= "<label for=\"VerifierNotes\" class=\"vlabel3\">Verifier notes</label><textarea name=\"VerifierNotes\" id=\"VerifierNotes\" class=\"vdata tall\">".$ride_data['VerifierNotes']."</textarea><br>";
 	$res .= '</div>';
 
@@ -260,7 +262,7 @@ function show_ride_details_content($ride_data)
 
 
 	$res .= '<div class="vspan">';
-	$res .= "<label for=\"PayMethod\" class=\"vlabel3\">Payment method</label><input title=\"Normally Paypal\" type=\"text\" list=\"paymethods\" name=\"PayMethod\" id=\"PayMethod\" class=\"vdata\" value=\"".$ride_data['PayMethod']."\" />";
+	$res .= "<label for=\"PayMethod\" class=\"vlabel3\">Payment method</label><input title=\"Normally Paypal\" type=\"text\" list=\"paymethods\" name=\"PayMethod\" id=\"PayMethod\" class=\"vdata short\" value=\"".$ride_data['PayMethod']."\" />";
 	$res .= "<datalist id=\"paymethods\"><option>Paypal</option><option>FOC</option></datalist>";
 	$res .= "<br />&nbsp;<br /><label for=\"DatePayReq\" class=\"vlabel2\">Date payment requested</label><input type=\"date\" name=\"DatePayReq\" id=\"DatePayReq\" onchange=\"setRideStatus();\" class=\"vdata\" value=\"".$ride_data['DatePayReq']."\" />";
 	$res .= "<label for=\"DatePayRcvd\" class=\"vlabel3\">Date payment received</label><input type=\"date\" name=\"DatePayRcvd\" id=\"DatePayRcvd\" onchange=\"setRideStatus();doPaymentReceived();\" class=\"vdata\" value=\"".$ride_data['DatePayRcvd']."\" />";
