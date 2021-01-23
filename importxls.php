@@ -23,11 +23,11 @@ if (!$OK) safe_default_action();
 
 $debuglog = false;
 
-$target_dir = __DIR__ . "/public/uploads/";
+$target_dir = __DIR__ . DIRECTORY_SEPARATOR."public".DIRECTORY_SEPARATOR."uploads".DIRECTORY_SEPARATOR;
 
-require_once("vendor\autoload.php");
+require_once("vendor".DIRECTORY_SEPARATOR."autoload.php");
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
-require_once './includespec.php';
+require_once '.'.DIRECTORY_SEPARATOR.'includespec.php';
 include "loadimports.php";
 
 start_html("Loading data");
