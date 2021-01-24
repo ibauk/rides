@@ -20,9 +20,9 @@ $IMPORTSPEC['cols']['RiderIBA'] = 7;
 $IMPORTSPEC['cols']['PillionIBA'] = 8;
 $IMPORTSPEC['cols']['BikeReg'] = 9;
 $IMPORTSPEC['cols']['class'] = 10;
-$IMPORTSPEC['cols']['email'] = 11;
-$IMPORTSPEC['cols']['postcode'] = 12;
-$IMPORTSPEC['cols']['phone'] = 13;
+$IMPORTSPEC['cols']['email'] = 12;
+$IMPORTSPEC['cols']['postcode'] = 13;
+$IMPORTSPEC['cols']['phone'] = 11;
 $IMPORTSPEC['cols']['country'] = 14;
 
 
@@ -31,7 +31,7 @@ $IMPORTSPEC['cols']['country'] = 14;
 
 
 // Spreadsheet column mapping. Leftmost is column 1
-$IMPORTSPEC['cols']['address'] = 18;
+$IMPORTSPEC['cols']['address'] = 15;
 
 
  
