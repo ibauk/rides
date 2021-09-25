@@ -207,12 +207,14 @@ function show_ride_details_content($ride_data)
 	$sp = htmlspecialchars($ride_data['StartPoint']);
 	$vp = htmlspecialchars($ride_data['MidPoints']);
 	$fp = htmlspecialchars($ride_data['FinishPoint']);
+	$st = htmlspecialchars($ride_data['TrackURL']);
 	$res .= "<label for=\"StartPoint\" class=\"vlabel3\">Start point</label><input title=\"$sp\" type=\"text\" name=\"StartPoint\" id=\"StartPoint\" class=\"vdata\" $ro value=\"$sp\" />";
 	$res .= "<label for=\"MidPoints\" class=\"vlabel3\">via</label><input title=\"$vp\" type=\"text\" name=\"MidPoints\" id=\"MidPoints\" class=\"vdata\" $ro value=\"$vp\" />";
 	$res .= "<br><br><label for=\"FinishPoint\" class=\"vlabel3\">Finish point</label><input title=\"$fp\"type=\"text\" name=\"FinishPoint\" id=\"FinishPoint\" class=\"vdata\" $ro value=\"$fp\" />";
 	$res .= '</div>';
 	$res .= '<div class="vspan">';
-	$res .= "<br><label for=\"RiderNotes\" class=\"vlabel3\">Rider notes</label><textarea name=\"RiderNotes\" id=\"RiderNotes\" class=\"vdata tall\" $ro>".$ride_data['RiderNotes']."</textarea>";
+	$res .= "<br><label for=\"RiderNotes\" class=\"vlabel3\">Rider notes</label><textarea name=\"RiderNotes\" id=\"RiderNotes\" class=\"vdata tall\" $ro>".$ride_data['RiderNotes']."</textarea> ";
+	$res .= '<label for="TrackURL">Spot track</label> <input type="text" id="TrackURL" name="TrackURL" value="'.$st.'" class="vdata" />';
 	$res .= '</div>';
 
 	$res .= "</div>"; // tabContent
@@ -567,6 +569,7 @@ function putRide()
 		$SQL .= ",WantCertificate,RiderNotes,DateRcvd,RideVerifier,Acknowledged,DateVerified,Failed";
 		$SQL .= ",DatePayReq,DatePayRcvd,PayMethod,DateCertSent,USA_FeeDollars,DateUSAPaid,TimeStart,TimeFinish";
 		$SQL .= ",RideHours,RideMins,VerifierNotes,ShowRoH,PassedToUSA,OriginUK,IBA_RideID";
+		$SQL .= ",TrackURL";
 		$SQL .= ") VALUES (";
 		$SQL .= safedatesql($_POST['DateRideStart']);
 		$SQL .= ",".safedatesql($_POST['DateRideFinish']);
@@ -606,6 +609,7 @@ function putRide()
 		$SQL .= ",'".safesql($_POST['PassedToUSA'])."'";
 		$SQL .= ",'".safesql($_POST['OriginUK'])."'";
 		$SQL .= ",".safesql($_POST['IBA_RideID']);
+		$SQL .= ",".safesql($_POST['TrackURL']);
 		$SQL .= ")";
 	} elseif ($_POST['RideDeleted']=='Y') {
 		$SQL = "UPDATE rides SET Deleted='Y' WHERE URI=".$_POST[$CMDWORDS['uri']];
@@ -651,6 +655,7 @@ function putRide()
 		$SQL .= ",OriginUK='".safesql($_POST['OriginUK'])."'";
 		$SQL .= ",Deleted='N'";
 		$SQL .= ",IBA_RideID=".safesql($_POST['IBA_RideID']);
+		$SQL .= ",TrackURL='".safesql($_POST['TrackURL'])."'";
 		$SQL .= " WHERE URI=".$_POST[$CMDWORDS['uri']];
 	}
 

@@ -216,7 +216,7 @@ legend			{ padding: 0.5em;  border: 2px solid darkgray; background-color: lightg
 [name="IBA_Number"]		{ width:6em; }
 
 input[type="tel"] { width:10em; }
-input[type="date"] { width:10em;  }
+input[type="date"] { width:11em;  }
 input[type="submit"] { font-size: 1.2em; cursor: pointer; border: 3px solid; padding: .2em; border-radius: 10px;}
 input[type="submit"]:hover:enabled { background-color:yellow; border-color: red; color: black; font-weight: bold;}
 input[type="submit"]:disabled { background-color:lightgray; color: darkgray; border-color: lightgray;}

@@ -16,7 +16,7 @@ require_once("serverstatus.php");
 $APPLICATION_TITLE = "IBAUK Rides Database ($serverstatus)";
 $PUBLIC_TITLE = "IBAUK Roll of Honour";
 
-$APPLICATION_VERSION = "2.12";
+$APPLICATION_VERSION = "2.13";
 // 2.0  01SEP16 Initial PHP release
 // 2.1	20OCT16	Live release
 // 2.2	04DEC16 Highlighting non-UK rides; defaults for non-UK rides; extra tooltips
@@ -30,8 +30,9 @@ $APPLICATION_VERSION = "2.12";
 // 2.10	14JUN18	Current/Lapsed member status + RBLR imports
 // 2.11 21AUG20 Recode for SQLite, Code overhaul
 // 2.12	28SEP20	Refactor import routines
+// 2.13 25SEP21 Fix date width, suppress debug logging, TrackURL
 
-$APPLICATION_COPYRIGHT = "Copyright &copy; 2020 Bob Stammers on behalf of Iron Butt UK";
+$APPLICATION_COPYRIGHT = "Copyright &copy; 2021 Bob Stammers on behalf of Iron Butt UK";
 
 
 

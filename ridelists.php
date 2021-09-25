@@ -94,9 +94,9 @@ function show_rides_table($where,$caption,$colselection)
 		$KEY_DESC = $KEY_ORDER;
 	}
 	$SQL .= sql_order();
-	error_log($SQL);
+	//error_log($SQL);
 	$ride = sql_query($SQL);
-	error_log("Trying ...");
+	//error_log("Trying ...");
 	$TotRows = foundrows($ride);
 	$xl = '';
 	if ($_SESSION['ACCESSLEVEL'] >= $GLOBALS['ACCESSLEVEL_UPDATE'])
@@ -241,7 +241,7 @@ function mark_sent_to_USA()
 
 	$sentdate = date("Y-m-d");
 	$sql = "UPDATE rides SET PassedToUSA='Y',DateUSAPaid='$sentdate' WHERE (Failed='N' AND OriginUK='Y' AND PassedToUSA='N' AND ShowRoH='Y')";
-	error_log($sql);
+	//error_log($sql);
 	sql_query($sql);
 	show_infoline('All outstanding rides marked as having been reported to the USA','infohilite');
 	show_full_rides_listing();

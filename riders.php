@@ -107,7 +107,7 @@ function show_riders_table($where,$what='Riders')
 	if ($OK)
 		$xl = "<a href=\"index.php?c=snr\">Setup New Rider</a>";
 	echo("<div class=\"maindata\" $TotRows><br /<br />");
-	error_log("TotRows=$TotRows; PAGESIZE=$PAGESIZE;");
+	//error_log("TotRows=$TotRows; PAGESIZE=$PAGESIZE;");
 	$numrows = countrecs($ride);
 	if ($PAGESIZE > 0 && $TotRows > $PAGESIZE)
 		show_common_paging($TotRows,$xl);
@@ -396,7 +396,7 @@ function show_rider_details_content($ride_data)
 
 	// Bikes
 	$SQL = "SELECT * FROM bikes WHERE riderid=".$bikerider.andDeleted()." ORDER BY bikeid";
-	error_log('Bikes: '.$SQL);
+	//error_log('Bikes: '.$SQL);
 	$rn = sql_query($SQL);
 	$nbikes = foundrows($rn);
 	$res .= "<table style=\" border: none; \"><tr><th>Bike</th><th>Registration</th><th>Odometer</th><th>Rides</th>";
