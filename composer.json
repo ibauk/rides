@@ -1,0 +1,8 @@
+{
+    "require": {
+        "phpoffice/phpspreadsheet": "^1.18"
+    },
+    "name": "ibauk/rides",
+    "description": "Ride/rally archives for IBA UK",
+    "license": "MIT"
+}
