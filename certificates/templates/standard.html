@@ -1,33 +1,62 @@
 <!DOCTYPE html>
 <html lang="en-GB">
-<head>
-<title>Standard IBA ride template</title>
-<link rel="stylesheet" type="text/css" href="certificates/css/ridecert.css?v=1">
-<script src="certificates/js/ridecert.js?v=1"></script>
-</head>
-<body onload="fixCertVars()">
-<nav class="floating-menu">
-<h3 id="toolbar_title"></h3><br />
-<a href="#" onclick="window.print()">Print</a>
-<a href="#" onclick="saveCertificate()">Save</a>
-</nav>
-<div id="page">
-<div class="header">
-<img id="header_badge" src="certificates/images/ibadefault.jpg" alt="Iron Butt Association Ride Certificate" ondblclick="updateImg(this);" />
-<span class="metadata" id="URI">#URI#</span>
-<p>#IBA_Ride_Desc#</p>
-</div>
-<div class="citation" contenteditable="true" spellcheck="true">
-<p>This is to certify that on the #DateRideStart#, #NameOnCertificate# rode a #Bike# a total of #TotalMiles# gruelling miles in less than #MaxHours# hours starting in #StartPoint# continuing onto #MidPoints# before ending in #FinishPoint# while participating in the #IBA_Ride_Title#.</p>
-</div>
-<div class="strict" contenteditable="true" spellcheck="true">
-<p>The #IBA_Ride_Title# was conducted under very strict guidelines set forth by the Iron Butt Association.  Only a handful of riders from around the world have managed to solve the challenges such a gruelling ride involves.</p>
-</div>
-<img src="certificates/images/ibauk.png" alt="" style="float:right;padding-top:4em;"/>
-<div id="signature" contenteditable="true" spellcheck="true">
-<p><strong>Philip Weston</strong><br />
-President, <br />
-The Iron Butt Association UK</p>
-</div>
-</body>
+  <head>
+    <title>Standard IBA ride template</title>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="certificates/css/ridecert.css?v=1"
+    />
+    <script src="certificates/js/ridecert.js?v=2"></script>
+  </head>
+  <body onload="fixCertVars()">
+    <nav class="floating-menu">
+      <h3 id="toolbar_title"></h3>
+      <br />
+      <a href="#" onclick="window.print()">Print</a>
+      <a href="#" onclick="saveCertificate(this)">Save</a>
+    </nav>
+    <div id="page">
+      <div class="header">
+        <img
+          id="header_badge"
+          src="certificates/images/ibadefault.jpg"
+          alt="Iron Butt Association Ride Certificate"
+          ondblclick="updateImg(this);"
+        />
+        <span class="metadata" id="URI">#URI#</span>
+        <p>#IBA_Ride_Desc#</p>
+      </div>
+      <div class="citation" contenteditable="true" spellcheck="true">
+        <p>
+          This is to certify that on the #DateRideStart#, #NameOnCertificate#
+          rode a #Bike# a total of #TotalMiles# gruelling miles in less than
+          #MaxHours# hours starting in #StartPoint#, continuing on to #MidPoints#
+          before ending in #FinishPoint# while participating in the
+          #IBA_Ride_Title#.
+        </p>
+      </div>
+      <div class="strict" contenteditable="true" spellcheck="true">
+        <p>
+          The #IBA_Ride_Title# was conducted under very strict guidelines set
+          forth by the Iron Butt Association. Only a handful of riders from
+          around the world have managed to solve the challenges such a gruelling
+          ride involves.
+        </p>
+      </div>
+      <img
+        src="certificates/images/ibauk.png"
+        alt=""
+        style="float: right; padding-top: 4em"
+      />
+      <div id="signature" contenteditable="true" spellcheck="true">
+        <img src="certificates/images/mbucksig.jpg" alt="" />
+        <p>
+          <strong>Martin Buck</strong><br />
+          President, <br />
+          The Iron Butt Association UK
+        </p>
+      </div>
+    </div>
+  </body>
 </html>
