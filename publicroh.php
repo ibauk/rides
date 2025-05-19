@@ -21,9 +21,12 @@ $PUBLIC_RIDES_SQL  = "SELECT DateRideStart,NameOnCertificate,IfNull(RideStars,''
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <script src="jquery.js" type="text/javascript"></script>
 <script src="jquery.dataTables.min.js" type="text/javascript"></script>
+<link href="public/css/dataTables.min.css" rel="stylesheet" type="text/css" />
 <link href="public/css/demo_table_jui.css" rel="stylesheet" type="text/css" />
 <style type="text/css">
 
@@ -57,7 +60,7 @@ $(document).ready(function() {
 		"sScrollY": "475px",
 		"bAutoWidth": true,
 		"bPaginate": true,
-		"sPaginationType": "full_numbers", //full_numbers,two_button
+		"sPaginationType": "simple", //full_numbers,two_button
 		"bStateSave": true,
 		"bInfo": true,
 		"bFilter": true,

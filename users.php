@@ -18,7 +18,9 @@ require 'PasswordHash.php';
 function update_users()
 {
 
-	global $HASH_COST_LOG2, $HASH_PORTABLE, $db_ibauk_conn;
+	global $HASH_COST_LOG2, $HASH_PORTABLE;
+
+    //echo("HASH_COST_LOG2 = ".$HASH_COST_LOG2."; HASH_PORTABLE = ".($HASH_PORTABLE ? 'TRUE' : 'FALSE').";<hr>");
 
     foreach($_POST as $K => $V)
     {
@@ -63,6 +65,7 @@ function update_users()
 
 		$hasher = new PasswordHash($HASH_COST_LOG2, $HASH_PORTABLE);
 		$hash = $hasher->HashPassword($_POST['password1']);
+        //echo("hash = ".$hash."; p1 = ".$_POST['password1'].";<hr>");
 		unset($hasher);
 		
         $SQL  = "INSERT INTO users (userid,userpass";

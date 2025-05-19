@@ -269,7 +269,7 @@ function showDuplicateRiders()
 
 	$SQL = "SELECT riders.Rider_Name as Rider,riders.IBA_Number as \"IBA#\",0 as Rides,riders.Country,riders.Postal_Address as Address,";
 	$SQL .= "riders.Postcode,riders.Email,riders.DateLastActive as LastActive,riderid FROM riders WHERE ";
-	$SQL .= "IBA_Number In (SELECT IBA_Number FROM riders WHERE IBA_Number <> '' AND Deleted='N' GROUP BY IBA_Number HAVING Count(IBA_Number)>1) ";
+	$SQL .= "IBA_Number In (SELECT IBA_Number FROM riders WHERE IBA_Number > '0' AND Deleted='N' GROUP BY IBA_Number HAVING Count(IBA_Number)>1) ";
 	$SQL .= " ORDER BY IBA_Number";
 	$rs = sql_query($SQL);
 	$TotRows = foundrows($rs);
@@ -296,7 +296,9 @@ function showDuplicateRiders()
 		$sql = "SELECT IFNULL(Count(URI),0) As Rex FROM rides WHERE riderid=".$rd['riderid'];
 		$rd['Rides'] = getValueFromDB($sql,"Rex",0);
 		foreach ($rd as $fld=>$val) {
-			echo ("<td>".htmlentities($val)."</td>");
+			$st = '';
+			if ($fld=='Rides') $st = ' style="text-align:center;"';
+			echo ("<td$st>".htmlentities($val)."</td>");
 		}
 
 		$res = '<td><input type="checkbox" data-riderid="'.$rd['riderid'].'"';

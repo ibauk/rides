@@ -5,7 +5,7 @@
  * This is the SQLITE version
  * 
  * 
- * Copyright (c) 2020 Bob Stammers
+ * Copyright (c) 2025 Bob Stammers
  *
  */
 
@@ -166,8 +166,11 @@ function emit_filelist($listid,$folder_path,$fileRE)
 
 function emit_filelistOptions($folderPath,$fileRE,$current)
 {
-	$folder = opendir($folderPath);
-	while(false !== ($file = readdir($folder))) {
+	$folder = scandir($folderPath);
+	for ($i = 0; $i < count($folder); $i++) {
+		if ($folder[$i] == '.') continue;
+		if ($folder[$i] == '..') continue;
+		$file = $folder[$i];
 		$extension = strtolower(pathinfo($file ,PATHINFO_EXTENSION));
 		if (preg_match($fileRE,$extension)) {
 			echo('<option value="'.$file.'" ');
@@ -300,6 +303,16 @@ function update_ridetype()
 
 		// No protection here against inserting a duplicate IBA_Ride!
 
+		$sql = "SELECT IBA_Ride_Title FROM ridenames WHERE IBA_Ride='".safesql($_REQUEST['IBA_Ride'])."'";
+		$rs = sql_query($sql);
+		$rd = $rs->fetchArray();
+		if ($rd) {
+			start_html("error");
+			show_infoline("'".$_REQUEST['IBA_Ride']."' already exists","errormsg");
+			return;
+		}
+		
+
 		$sql = "INSERT INTO ridenames (IBA_Ride,IBA_Ride_Title,IBA_Ride_Desc,MaxHours";
 		$sql .= ",HdrImg,TemplateID,Deleted,MilesKms,MinDistance) VALUES(";
 		$sql .= "'".safesql($_REQUEST['IBA_Ride'])."'";
@@ -318,7 +331,7 @@ function update_ridetype()
 		$sql .= "IBA_Ride='".safesql($_REQUEST['IBA_Ride'])."'";
 		$sql .= ",IBA_Ride_Title='".safesql($_REQUEST['IBA_Ride_Title'])."'";
 		$sql .= ",IBA_Ride_Desc='".safesql($_REQUEST['IBA_Ride_Desc'])."'";
-		$sql .= ",MaxHours=".intval($_REQUEST['IBA_Ride']);
+		$sql .= ",MaxHours=".intval($_REQUEST['MaxHours']);
 		$sql .= ",HdrImg='".safesql($_REQUEST['HdrImg'])."'";
 		$sql .= ",TemplateID='".safesql($_REQUEST['TemplateID'])."'";
 		$sql .= ",Deleted='".safesql($_REQUEST['deletethisrec'])."'";

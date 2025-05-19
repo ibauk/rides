@@ -4,6 +4,7 @@ require_once("db.conf.php");
 
 function respondWith($iba,$sname,$email) {
 
+    $json = new StdClass();
     $json->iba = $iba;
     $json->sname = $sname;
     $json->email = $email;

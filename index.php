@@ -3,7 +3,7 @@
 /*
  * I B A U K - index.php
  *
- * Copyright (c) 2016 Bob Stammers
+ * Copyright (c) 2023 Bob Stammers
  *
  * 2017-01 melines = publicme.php
  */
@@ -21,7 +21,8 @@ if ($cmd=="") $cmd = strtok($_REQUEST['c']," ");
 if (!isset($_SESSION['GUEST_ACCESSLEVEL']))
 	setGuestAccess();
 
-	
+// print_r($_REQUEST);
+
 switch (strtoupper($cmd))
 {
 	case strtoupper($CMDWORDS['savesettings']):
@@ -58,6 +59,9 @@ switch (strtoupper($cmd))
 		exit;
 	case 'DBEXPORT':
 		include("dbexport.php");
+		exit;
+	case 'EVENTS':
+		include("peventsedit.php");
 		exit;
 	case 'IMPORT':
 		include('importer.php');

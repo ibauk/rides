@@ -28,25 +28,34 @@ $target_dir = __DIR__ . DIRECTORY_SEPARATOR."public".DIRECTORY_SEPARATOR."upload
 require_once("vendor".DIRECTORY_SEPARATOR."autoload.php");
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 require_once '.'.DIRECTORY_SEPARATOR.'includespec.php';
-include "loadimports.php";
 
+include "loadimports.php";
 start_html("Loading data");
 
-if (!isset($IMPORTSPEC['xlsname'])) 
+if (!isset($IMPORTSPEC['xlsname'])) {
+	echo("No spreadsheet<br>");
 	die("No spreadsheet name found");
+}
 
 
 if ($debuglog) echo("Opening ".$IMPORTSPEC['xlsname']."<br />");
-try {
-	$xlstype = \PhpOffice\PhpSpreadsheet\IOFactory::identify($target_dir.$IMPORTSPEC['xlsname']);
-} catch (Exception $e) {show_infoline("Error: ".$e->getMessage(),'errormsg');
+if (false) {
+	try {
+		$xlstype = \PhpOffice\PhpSpreadsheet\IOFactory::identify($target_dir.$IMPORTSPEC['xlsname']);
+	} catch (Exception $e) {
+		show_infoline("Error: ".$e->getMessage(),'errormsg');
+	}
+} else {
+	$xlstype = "Csv";
 }
+//echo("Import 3<br>");
 
 $rdr = \PhpOffice\PhpSpreadsheet\IOFactory::createReader($xlstype); 
 $rdr->setReadDataOnly(true);
 $rdr->setLoadSheetsOnly($IMPORTSPEC['whichsheet']);
 
 $xls = $rdr->load($target_dir.$IMPORTSPEC['xlsname']);
+echo("Import 4<br>");
 
 $sheet = $xls->getSheet($IMPORTSPEC['whichsheet']);
 	

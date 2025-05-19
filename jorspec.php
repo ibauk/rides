@@ -5,7 +5,7 @@
 
 $IMPORTSPEC['xlsname']		= "jorvic.xlsx";
 $IMPORTSPEC['whichsheet']	= 0;
-$IMPORTSPEC['eventid']		= "Jorvic18";	
+$IMPORTSPEC['eventid']		= "Jorvik20";	
 
 $IMPORTSPEC['ride_rally']	= 1;
 

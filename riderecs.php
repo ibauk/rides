@@ -5,7 +5,7 @@
  * This is the SQLITE version
  * 
  * 
- * Copyright (c) 2020 Bob Stammers
+ * Copyright (c) 2025 Bob Stammers
  *
  * 2017-01	Set Deleted=N as appropriate
  * 2017-09	Fixed rides.Kmsodo + wrong bike updating
@@ -44,7 +44,7 @@ function show_ride_details_content($ride_data)
 	$bikelist .= "</datalist>\r\n";
 	$res .= $bikelist;
 	$res .= "<form action=\"index.php\" method=\"post\" id=\"ridedetails\"><input type=\"hidden\" name=\"cmd\" value=\"putride\">";
-	$res .= "<input type=\"hidden\" name=\"URI\" value=\"".$ride_data['URI']."\">";
+	$res .= "<input type=\"hidden\" name=\"URI\" id=\"URI\" value=\"".$ride_data['URI']."\">";
 	$res .= "<input type=\"hidden\" name=\"riderid\" value=\"".$ride_data['riderid']."\">";
 	$res .= "<input type=\"hidden\" id=\"bikeid\" name=\"bikeid\" value=\"".$ride_data['bikeid']."\">";
 	if ($ride_data['URI'] == 'newrec')
@@ -83,24 +83,48 @@ function show_ride_details_content($ride_data)
 		$onc = ' oninput="setCertificateName(this);" ';
 	else
 		$onc = '';	
-	$res .= "<label for=\"Rider_Name\" class=\"vlabel3\">Rider name</label> ";
-	$res .= "<input $onc type=\"text\" name=\"Rider_Name\" id=\"Rider_Name\" class=\"vdata shorter\" $de value=\"".$ride_data['Rider_Name']."\" />";
+	$res .= "<label for=\"Rider_First\" class=\"vlabel3\">Rider name</label> ";
+
+	//$res .= "<input $onc type=\"text\" name=\"Rider_Name\" id=\"Rider_Name\" class=\"vdata shorter\" $de value=\"".$ride_data['Rider_Name']."\" />";
+	$res .= '<input '.$onc.' type="text" placeholder="first" name="Rider_First" id="Rider_First" class="vdata firstname" '.$de.' value="'.$ride_data['Rider_First'].'" />';
+	$res .= ' <input '.$onc.' type="text" placeholder="last" name="Rider_Last" id="Rider_Last" class="vdata lastname" '.$de.' value="'.$ride_data['Rider_Last'].'" />';
+	
 	$res .= "<label for=\"NameOnCertificate\" class=\"vlabel3\">Name  (certificate)</label><input type=\"text\" name=\"NameOnCertificate\" id=\"NameOnCertificate\" class=\"vdata shorter\" $ro value=\"".$ride_data['NameOnCertificate']."\" />";
 	$res .= '</div>';
 
 	$res .= '<div class="vspan">';
-	$res .= "<label for=\"Postal_Address\" class=\"vlabel3\">Postal address</label><textarea name=\"Postal_Address\" id=\"Postal_Address\" $ro class=\"vdata tall\" >".$ride_data['Postal_Address']."</textarea>";
-	$res .= "<label for=\"RideStars\" class=\"vlabel3\">RideStars</label><input placeholder=\"What's special?\" tabindex=\"-1\" type=\"text\" name=\"RideStars\" id=\"RideStars\" class=\"vdata short\" title=\"What's significant about the rider/pillion on this ride, age?\" $ro value=\"".$ride_data['RideStars']."\" />";
+	$res .= "<label for=\"Postal_Address\" class=\"vlabel3\">Postal address</label><!--<textarea name=\"Postal_Address\" id=\"Postal_Address\" $ro class=\"vdata tall\" >".$ride_data['Postal_Address']."</textarea>-->";
+
+
+	
+	$res .= '<fieldset class="AddressBlock">';
+	$res .= '<field><label for="Address1">1 of 2</label>';
+	$res .= '<input type="text" oninput="enableSave();" class="vdata" id="Address1" name="Address1"value="'.$ride_data['Address1'].'" '.$ro.'></field>';
+	$res .= '<field><label for="Address2">2 of 2</label>';
+	$res .= '<input type="text" class="vdata" oninput="enableSave();" id="Address2" name="Address2" value="'.$ride_data['Address2'].'" '.$ro.'></field>';
+	$res .= '<field><label for="Town">Town</label>';
+	$res .= '<input type="text" class="vdata" oninput="enableSave();" id="Town" name="Town" value="'.$ride_data['Town'].'" '.$ro.'></field>';
+	$res .= '<field><label for="County">County</label>';
+	$res .= '<input type="text" class="vdata" oninput="enableSave();" id="County" name="County" value="'.$ride_data['County'].'" '.$ro.'></field>';
+	
+	$res .= "<field><label for=\"Postcode\">Postcode</label><input  oninput=\"enableSave();\" type=\"text\" name=\"Postcode\" id=\"Postcode\" class=\"vdata short\" $ro maxlength=\"10\" value=\"".$ride_data['Postcode']."\" ></field>";	
+	
+	$res .= "<field><label for=\"Country\">Country</label>";
+	$res .= "<input  oninput=\"enableSave();\" type=\"text\" name=\"Country\" id=\"Country\" $ro class=\"vdata shorter\" value=\"".$ride_data['Country']."\" ></field>";
+
+	$res .= '</fieldset>';
+
+
 	if ($ride_data['URI'] <> 'newrec')
 	{
 		$res .= "<label for=\"editriderbutton\" class=\"vlabel3\"></label>";
-		$res .= "<input type=\"submit\" id=\"editriderbutton\" name=\"cmd\" value=\"UpdateRiderRecord\" title=\"Click to update the full rider record\">";
+		$res .= "<input type=\"submit\" style=\"float: right;\" id=\"editriderbutton\" name=\"cmd\" value=\"UpdateRiderRecord\" title=\"Click to update the full rider record\">";
 	}
 	$res .= "</div>";
 
 
 	$res .= '<div class="vspan">';
-	$res .= "<label for=\"Postcode\" class=\"vlabel3\">Postcode</label><input type=\"text\" name=\"Postcode\" id=\"Postcode\" class=\"vdata short\"  $ro value=\"".$ride_data['Postcode']."\" />";
+	//$res .= "<label for=\"Postcode\" class=\"vlabel3\">Postcode</label><input type=\"text\" name=\"Postcode\" id=\"Postcode\" class=\"vdata short\"  $ro value=\"".$ride_data['Postcode']."\" />";
 	$em = htmlspecialchars($ride_data['Email']);
 	$res .= "<label for=\"Email\" class=\"vlabel3\">Email</label><input title=\"$em\" type=\"email\" name=\"Email\" id=\"Email\" class=\"vdata\"  $ro value=\"$em\" />";
 	$res .= "<a tabindex=\"-1\" id=\"sendMail\" href=\"mailto:".$ride_data['Email']."\"> $EMAIL_ICON</a>";
@@ -156,13 +180,17 @@ function show_ride_details_content($ride_data)
 	$res .= ' &nbsp;&nbsp; ';
 	$res .= "<input type=\"radio\" name=\"IsPillion\" class=\"radio2\" $disabled value=\"Y\" ".Checkbox_isChecked($ride_data['IsPillion'])."> Pillion";
 	$res .= "</fieldset>";
+
+
+	$res .= "<label for=\"RideStars\" class=\"vlabel3\">RideStars</label><input placeholder=\"What's special?\"  type=\"text\" name=\"RideStars\" id=\"RideStars\" class=\"vdata \" title=\"What's significant about the rider/pillion/bike on this ride, age?\rAppears on the Roll of Honour\" $ro value=\"".$ride_data['RideStars']."\" />";
+
 	$res .= '</div>';
 
 	$res .= "<hr />";
 
 	$res .= '<div class="vspan">';
 	$res .= "<label for=\"BikeChoice\" class=\"vlabel3\">Bike</label>";
-	$res .= "<select  onchange=\"chooseBike();\" $ro id=\"BikeChoice\" name=\"Bike\" class=\"vdata shorter\" $ro >";
+	$res .= "<select  onchange=\"chooseBike();\" $ro id=\"BikeChoice\" name=\"Bike\" class=\"vdata \" $ro >";
 	if ($ride_data['riderid'] <> 'newrec' && $ride_data['riderid'] <> '') {
 		$rn = sql_query("SELECT * FROM bikes WHERE riderid=".$ride_data['riderid']);
 		while(true)	{
@@ -209,12 +237,15 @@ function show_ride_details_content($ride_data)
 	$fp = htmlspecialchars($ride_data['FinishPoint']);
 	$st = htmlspecialchars($ride_data['TrackURL']);
 	$res .= "<label for=\"StartPoint\" class=\"vlabel3\">Start point</label><input title=\"$sp\" type=\"text\" name=\"StartPoint\" id=\"StartPoint\" class=\"vdata\" $ro value=\"$sp\" />";
-	$res .= "<label for=\"MidPoints\" class=\"vlabel3\">via</label><input title=\"$vp\" type=\"text\" name=\"MidPoints\" id=\"MidPoints\" class=\"vdata\" $ro value=\"$vp\" />";
+	$res .= "<label for=\"MidPoints\" class=\"vlabel3\">via</label><input title=\"$vp\" type=\"text\" name=\"MidPoints\" id=\"MidPoints\" class=\"vdata wider\" $ro value=\"$vp\" />";
 	$res .= "<br><br><label for=\"FinishPoint\" class=\"vlabel3\">Finish point</label><input title=\"$fp\"type=\"text\" name=\"FinishPoint\" id=\"FinishPoint\" class=\"vdata\" $ro value=\"$fp\" />";
 	$res .= '</div>';
 	$res .= '<div class="vspan">';
 	$res .= "<br><label for=\"RiderNotes\" class=\"vlabel3\">Rider notes</label><textarea name=\"RiderNotes\" id=\"RiderNotes\" class=\"vdata tall\" $ro>".$ride_data['RiderNotes']."</textarea> ";
-	$res .= '<label for="TrackURL">Spot track</label> <input type="text" id="TrackURL" name="TrackURL" value="'.$st.'" class="vdata" />';
+	$res .= '<label for="TrackURL">Spot track</label> <input type="text" id="TrackURL" name="TrackURL" value="'.$st.'" class="vdata wider" />';
+	if ($st <> "") {
+		$res .= ' <a href="'.$st.'" target="_blank" title="Open track in new page"> &#8734; </a>';
+	}
 	$res .= '</div>';
 
 	$res .= "</div>"; // tabContent
@@ -319,7 +350,7 @@ function show_ride_details_content($ride_data)
 	if ($showCertificate)
 	{
 		$res .= "<div class=\"tabContent\" id=\"tab_ridecert\">";
-		$res .= "<iframe style=\"min-height:400px; width:100%;\" src=\"index.php?c=ridecert&uri=".$ride_data['URI']."\"></iframe>";
+		$res .= "<iframe style=\"min-height:600px; width:100%;\" src=\"index.php?c=ridecert&uri=".$ride_data['URI']."\"></iframe>";
 		$res .= "</div>"; // tab_ridecert
 	}
 	if ($ro=='')
@@ -398,8 +429,25 @@ function showNewRide()
 	}
 	else if (is_numeric($_REQUEST['key']))
 		$rd['IBA_Number'] = $_REQUEST['key'];
-	else
+	else {
 		$rd['Rider_Name'] = $_REQUEST['key'];
+		if ($rd['Rider_Name'] != '') {
+			$x = explode(' ',$rd['Rider_Name']);
+			$xn = sizeof($x);
+			if ($xn > 1) {
+				$rd['Rider_Last'] = $x[$xn-1];
+				$rd['Rider_First'] = '';
+				$xs ='';
+				for ($ni = 0; $ni + 1 < $xn; $ni++) {
+					$rd['Rider_First'] .= $xs.$x[$ni];
+					$xs = ' ';
+				}
+			} else {
+				$rd['Rider_First'] = $rd['Rider_Name'];
+			}
+
+		}
+	}
 	if ($bikeid <> '' && $bikeid <> 'new' && !is_array($bikeid))
 	{
 		$sql = "SELECT * FROM bikes WHERE riderid=".$riderid." AND bikeid=".$bikeid;
@@ -413,7 +461,7 @@ function showNewRide()
 		}
 	}
 	// Set some defaults
-	$rd['NameOnCertificate'] = $rd['Rider_Name'];			
+	$rd['NameOnCertificate'] = $rd['Rider_First'].' '.$rd['Rider_Last'];			
 	$rd['WantCertificate'] = 'Y';
 	$rd['DateRcvd'] = date('Y-m-d');
 	$rd['OriginUK'] = 'Y';
@@ -426,16 +474,28 @@ function showNewRide()
 
 function establishNewRide()
 {
+
+	$RiderName = $_POST['Rider_Last'].', '.$_POST['Rider_First'];
+	$PostalAddress = $_POST['Address1'];
+
 	if ($_POST['riderid']=='')
 	{
-		$SQL = "INSERT INTO riders (Rider_Name,IBA_Number,Postal_Address,Postcode,Email,Phone,IsPillion) VALUES (";
-		$SQL .= "'".safesql($_POST['Rider_Name'])."'";
+		$SQL = "INSERT INTO riders (Rider_Name,IBA_Number,Postal_Address,Postcode,Email,Phone,IsPillion";
+		$SQL .= ",Rider_First,Rider_Last,Address1,Address2,Town,County";
+		$SQL .= ") VALUES (";
+		$SQL .= "'".safesql($RiderName)."'";
 		$SQL .= ",'".safesql($_POST['IBA_NUmber'])."'";
-		$SQL .= ",'".safesql($_POST['Postal_Address'])."'";
+		$SQL .= ",'".safesql($PostalAddress)."'";
 		$SQL .= ",'".safesql($_POST['Postcode'])."'";
 		$SQL .= ",'".safesql($_POST['Email'])."'";
 		$SQL .= ",'".safesql($_POST['Phone'])."'";
 		$SQL .= ",'".safesql($_POST['IsPillion'])."'";
+		$SQL .= ",'".safesql($_POST['Rider_First'])."'";
+		$SQL .= ",'".safesql($_POST['Rider_Last'])."'";
+		$SQL .= ",'".safesql($_POST['Address1'])."'";
+		$SQL .= ",'".safesql($_POST['Address2'])."'";
+		$SQL .= ",'".safesql($_POST['Town'])."'";
+		$SQL .= ",'".safesql($_POST['County'])."'";
 		$SQL .= ")";
 		sql_query($SQL);
 		$SQL = "SELECT riderid FROM riders ORDER BY riderid DESC LIMIT 1";
@@ -502,6 +562,12 @@ function putRide()
 		exit;
 	}
 	
+	$RiderName = $_POST['Rider_First'].' '.$_POST['Rider_Last'];
+	$PostalAddress = $_POST['Address1'];
+	if ($_POST['Address2'] != '') $PostalAddress .= "\n".$_POST['Address2'];
+	if ($_POST['Town'] != '') $PostalAddress .= "\n".$_POST['Town'];
+	if ($_POST['County'] != '') $PostalAddress .= "\n".$_POST['County'];
+
 	// Fixups
 	
 	if ($_POST['DateRideFinish'] == '')
@@ -511,14 +577,22 @@ function putRide()
 	// Post the rider details
 	if ($_POST['riderid'] == '')
 	{
-		$SQL = "INSERT INTO riders (Rider_Name,IBA_Number,Postal_Address,Postcode,Email,Phone,IsPillion) VALUES (";
-		$SQL .= "'".safesql($_POST['Rider_Name'])."'";
+		$SQL = "INSERT INTO riders (Rider_Name,IBA_Number,Postal_Address,Postcode,Email,Phone,IsPillion";
+		$SQL .= ",Rider_First,Rider_Last,Address1,Address2,Town,County";
+		$SQL .= ") VALUES (";
+		$SQL .= "'".safesql($RiderName)."'";
 		$SQL .= ",'".safesql($_POST['IBA_Number'])."'";
-		$SQL .= ",'".safesql($_POST['Postal_Address'])."'";
+		$SQL .= ",'".safesql($PostalAddress)."'";
 		$SQL .= ",'".safesql($_POST['Postcode'])."'";
 		$SQL .= ",'".safesql($_POST['Email'])."'";
 		$SQL .= ",'".safesql($_POST['Phone'])."'";
 		$SQL .= ",'".safesql($_POST['IsPillion'])."'";
+		$SQL .= ",'".safesql($_POST['Rider_First'])."'";
+		$SQL .= ",'".safesql($_POST['Rider_Last'])."'";
+		$SQL .= ",'".safesql($_POST['Address1'])."'";
+		$SQL .= ",'".safesql($_POST['Address2'])."'";
+		$SQL .= ",'".safesql($_POST['Town'])."'";
+		$SQL .= ",'".safesql($_POST['County'])."'";
 		$SQL .= ")";
 		sql_query($SQL);
 		$_POST['riderid'] = dblastid('riders','riderid');
@@ -526,13 +600,24 @@ function putRide()
 	else
 	{
 		$SQL = "UPDATE riders SET ";
-		$SQL .= "Rider_Name='".safesql($_POST['Rider_Name'])."'";
+		$SQL .= "Rider_Name='".safesql($RiderName)."'";
 		$SQL .= ",IBA_Number='".safesql($_POST['IBA_Number'])."'";
-		$SQL .= ",Postal_Address='".safesql($_POST['Postal_Address'])."'";
+		$SQL .= ",Postal_Address='".safesql($PostalAddress)."'";
 		$SQL .= ",Postcode='".safesql($_POST['Postcode'])."'";
 		$SQL .= ",Email='".safesql($_POST['Email'])."'";
 		$SQL .= ",Phone='".safesql($_POST['Phone'])."'";
 		$SQL .= ",IsPillion='".safesql($_POST['IsPillion'])."'";
+		
+		
+		$SQL .= ",Rider_First='".safesql($_POST['Rider_First'])."'";
+		$SQL .= ",Rider_Last='".safesql($_POST['Rider_Last'])."'";
+		$SQL .= ",Address1='".safesql($_POST['Address1'])."'";
+		$SQL .= ",Address2='".safesql($_POST['Address2'])."'";
+		$SQL .= ",Town='".safesql($_POST['Town'])."'";
+		$SQL .= ",County='".safesql($_POST['County'])."'";
+
+
+		
 		$SQL .= " WHERE riderid=".$_POST['riderid'];
 		sql_query($SQL);
 	}
@@ -609,7 +694,7 @@ function putRide()
 		$SQL .= ",'".safesql($_POST['PassedToUSA'])."'";
 		$SQL .= ",'".safesql($_POST['OriginUK'])."'";
 		$SQL .= ",".safesql($_POST['IBA_RideID']);
-		$SQL .= ",".safesql($_POST['TrackURL']);
+		$SQL .= ",'".safesql($_POST['TrackURL'])."'";
 		$SQL .= ")";
 	} elseif ($_POST['RideDeleted']=='Y') {
 		$SQL = "UPDATE rides SET Deleted='Y' WHERE URI=".$_POST[$CMDWORDS['uri']];

@@ -79,6 +79,7 @@ function query_results($R) {
 	try {
 		return $R->fetchArray();
 	} catch (exception $e) {
+		error_log($e->getMessage());
 		return null;
 	}
 

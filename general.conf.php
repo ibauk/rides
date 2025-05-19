@@ -6,7 +6,7 @@
  * This is the SQLITE version
  * 
  * 
- * Copyright (c) 2020 Bob Stammers
+ * Copyright (c) 2025 Bob Stammers
  *
  */
 
@@ -16,7 +16,7 @@ require_once("serverstatus.php");
 $APPLICATION_TITLE = "IBAUK Rides Database ($serverstatus)";
 $PUBLIC_TITLE = "IBAUK Roll of Honour";
 
-$APPLICATION_VERSION = "2.13";
+$APPLICATION_VERSION = "2.15";
 // 2.0  01SEP16 Initial PHP release
 // 2.1	20OCT16	Live release
 // 2.2	04DEC16 Highlighting non-UK rides; defaults for non-UK rides; extra tooltips
@@ -31,8 +31,10 @@ $APPLICATION_VERSION = "2.13";
 // 2.11 21AUG20 Recode for SQLite, Code overhaul
 // 2.12	28SEP20	Refactor import routines
 // 2.13 25SEP21 Fix date width, suppress debug logging, TrackURL
+// 2.14 30OCT23 Event list maintenance
+// 2.15 22MAR25 Variety of aesthetic and functional enhancements
 
-$APPLICATION_COPYRIGHT = "Copyright &copy; 2021 Bob Stammers on behalf of Iron Butt UK";
+$APPLICATION_COPYRIGHT = "Copyright &copy; 2025 Bob Stammers on behalf of Iron Butt UK";
 
 
 
@@ -194,7 +196,7 @@ function setGuestAccess()
 {
 	$SQL = "SELECT guestaccess,publicfields FROM sysvars WHERE recid=1";
 	$r = sql_query($SQL);
-	$rr = $r->fetchArray();
+	$rr = query_results($r);
 	//var_dump($_SESSION);
 	//echo('<hr />');
 	$_SESSION['GUEST_ACCESSLEVEL'] =$rr ['guestaccess'];
@@ -279,11 +281,21 @@ if ($_SESSION['ACCESSLEVEL'] >= $GLOBALS['ACCESSLEVEL_READONLY'] )
 		echo("<ul id=\"ridesmenu\" class=\"dropdown\">");
         echo("<li><a href=\"index.php?c=".$CMDWORDS['rides']."\">Show all rides</a></li>");
         echo("<li><a href=\"index.php?c=".$CMDWORDS['showroh']."\">Roll of Honour</a></li>");
+
+		$sqlx = "SELECT rptid,ReportTitle FROM listreports";
+		$sqlx .= " WHERE AccessLevel <= ".$_SESSION['ACCESSLEVEL'];
+		$sqlx .= " ORDER BY rptid";
+		$rs = sql_query($sqlx);
+		while ($rd = $rs->fetchArray()) {
+			echo('<li><a href="index.php?c='.$CMDWORDS['listrpt'].'&amp;rptid='.$rd['rptid'].'">'.$rd['ReportTitle'].'</a></li>');
+		}
+		/*
 		echo("<li><a href=\"index.php?c=".$CMDWORDS['listrpt']."&amp;rptid=usaos\">Report to USA</a></li>"); 
 		echo("<li><a href=\"index.php?c=".$CMDWORDS['listrpt']."&amp;rptid=pymtsos\">Waiting for payment</a></li>"); 
 		echo("<li><a href=\"index.php?c=".$CMDWORDS['listrpt']."&amp;rptid=unverified\">Not yet verified</a></li>"); 
 		echo("<li><a href=\"index.php?c=".$CMDWORDS['listrpt']."&amp;rptid=foreign\">Rides validated elsewhere</a></li>"); 
 		echo("<li><a href=\"index.php?c=".$CMDWORDS['listrpt']."&amp;rptid=notroh\">Rides omitted from RoH</a></li>"); 
+		*/
 		echo("</ul>");
 		echo("</li> ");
 	}
@@ -327,6 +339,9 @@ if ($_SESSION['ACCESSLEVEL'] >= $GLOBALS['ACCESSLEVEL_READONLY'] )
 
     if ($_SESSION['ACCESSLEVEL'] >= $GLOBALS['ACCESSLEVEL_READONLY'])
         echo("<li><a href=\"index.php?c=".$CMDWORDS['ridenames']."\" accesskey=\"r\">".$MYKEYWORDS['ridenames']."</a></li> ");
+    
+	if ($_SESSION['ACCESSLEVEL'] >= $GLOBALS['ACCESSLEVEL_READONLY'])
+        echo("<li><a href=\"index.php?c=".'events'."\" >".'EVENTS'."</a></li> ");
     
     if ($_SESSION['ACCESSLEVEL'] >= $GLOBALS['ACCESSLEVEL_READONLY'])
 		echo("<li><a href=\"index.php?c=".$CMDWORDS['about']."\" accesskey=\"a\">Control panel</a></li> ");

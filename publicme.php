@@ -5,14 +5,14 @@
  * This is the SQLITE version
  * 
  * 
- * Copyright (c) 2020 Bob Stammers
+ * Copyright (c) 2021 Bob Stammers
  *
  */
 
 require_once("general.conf.php");
 require_once("db.conf.php");
 
-$PUBLIC_RIDES_SQL  = "SELECT SQL_CALC_FOUND_ROWS Rider_Name,awardlevel,awardyear FROM mileeaters LEFT JOIN riders ON mileeaters.riderid=riders.riderid ";
+$PUBLIC_RIDES_SQL  = "SELECT Rider_Name,awardlevel,awardyear FROM mileeaters LEFT JOIN riders ON mileeaters.riderid=riders.riderid ";
 
 
 ?>

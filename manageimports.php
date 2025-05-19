@@ -12,6 +12,7 @@
 
 $target_dir = __DIR__ . "/public/uploads/";
 
+// print_r($_REQUEST);
 
 // Returns a file size limit in bytes based on the PHP upload_max_filesize
 // and post_max_size
@@ -190,7 +191,7 @@ echo('">');
 ?>
 
 <br /><br />
-<label for="eventid">Event description </label><input type="text" placeholder="RBLR 1000 ('23)" title="For rides this is an optional event descriptor; For rallies this is the short label as it appears in the rally results listing. eg 'BBR19'" name="eventid" id="eventid" onchange="checkLoad();"><br /><br />
+<label for="eventid">Event description </label><input type="text" title="For rides this is an optional event descriptor; For rallies this is the short label as it appears in the rally results listing. eg 'BBR19'" name="eventid" id="eventid" onchange="checkLoad();"><br /><br />
 <span id="ridedatespan"><label for="ridedate">Ride date (n/a for rallies) </label><input type="date" id="ridedate" name="ridedate" onchange="checkLoad();"><br /><br /></span>
 <input type="submit" id="loadspreadsheet" disabled value="Load spreadsheet" >
 </form>

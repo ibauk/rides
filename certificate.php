@@ -6,7 +6,7 @@
  * This is the SQLITE version
  * 
  * 
- * Copyright (c) 2020 Bob Stammers
+ * Copyright (c) 2025 Bob Stammers
  *
  */
 
@@ -130,7 +130,7 @@ function replaceHeaderBadge($txt,$badge)
 
 	global $TEMPLATE_IMAGES_PATH;
 	
-	return preg_replace("#id=\"header_badge\" src=\"([^\"]+)#","id=\"header_badge\" src=\"".$TEMPLATE_IMAGES_PATH.$badge,$txt);
+	return preg_replace("#id=\"header_badge\"\s+src=\"([^\"]+)#","id=\"header_badge\" src=\"".$TEMPLATE_IMAGES_PATH.$badge,$txt);
 }
 	
 function fetchCertTextFromRidenames($ridename)
@@ -226,17 +226,25 @@ function saveCertificate()
 {
 	$OK = ($_SESSION['ACCESSLEVEL'] >= $GLOBALS['ACCESSLEVEL_UPDATE']);
 	
-	if (!$OK) safe_default_action();
+	//if (!$OK) safe_default_action();
 
-	echo("<br /><br /><br />saveCertificate<hr />");
-	var_dump($_REQUEST);
+	//echo("<br /><br /><br />saveCertificate<hr />");
+	//var_dump($_REQUEST);
 	
 	$page_detail = $_REQUEST['certtext'];
 	$uri = $_REQUEST['URI'];
-	
-	$SQL = "INSERT INTO certificates (URI,CertText) VALUES(".$uri.",'".safesql($page_detail)."')";
-	$SQL .= " ON DUPLICATE KEY UPDATE CertText='".safesql($page_detail)."',Deleted='N'";
+
+	$sql = "SELECT CertificateID FROM certificates WHERE URI=".$uri;
+	$certid = getValueFromDB($sql,"CertificateID",0);
+
+	if ($certid < 1) {
+		$certid = intval(getValueFromDB("SELECT MAX(CertificateID) AS rex FROM certificates","rex",0)) + 1;
+		$SQL = "INSERT INTO certificates (CertificateID,URI,CertText) VALUES($certid,$uri,'".safesql($page_detail)."')";
+	} else {
+		$SQL = "UPDATE CertText='".safesql($page_detail)."',Deleted='N' WHERE CertificateID=".$certid;
+	}
 	sql_query($SQL);
+	echo('{"ok":true,"msg":"hello sailor"}');
 	
 }
 

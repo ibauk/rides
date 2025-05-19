@@ -6,7 +6,7 @@
  * This is the SQLITE version
  * 
  * 
- * Copyright (c) 2020 Bob Stammers
+ * Copyright (c) 2025 Bob Stammers
  *
  */
 
@@ -81,7 +81,6 @@ EOT;
 <p>Guest access to the Roll of Honour containing published details of certified rides only is available without logging in as a registered user. </p>
 <p>Records are never physically deleted from the database but are instead flagged as being deleted. Such records are excluded from all normal lists and counts unless the appropriate control panel option is checked.</p>
 <p>Dates are stored explicitly as dates, not text fields. They are shown and manipulated in the user interface according to the whims of your device/browser/locale. In your case, the date <strong>Wednesday 3rd August 2016</strong> appears as <input type="date" value="2016-08-03"></p>
-<p>[<a href="https://docs.google.com/document/d/1nBYhetAuxPZm5rJ5wWLR9SwHBRE6ot1HaaV2liTRsHU/edit?usp=sharing" target="docwin">User Guide</a>]  [<a href="https://docs.google.com/document/d/1rjcKdSpQGYNaDt6oYlRo-QmxswAHYhwY74NQ1pXHE-s/edit?usp=sharing" target="docwin">Database specifications</a>]</p>
 </div>
 <div class="tabContent" id="tab_environment">
 <?php	

@@ -89,9 +89,11 @@ function riders_table_row($uri)
 
 function show_riders_table($where,$what='Riders')
 {
-    global $RIDERS_SQL, $ORDER, $DESC, $OFFSET, $PAGESIZE, $CMDWORDS, $CSV_COLS;
+    global $RIDERS_SQL, $ORDER, $DESC, $OFFSET, $PAGESIZE, $CMDWORDS, $CSV_COLS, $KEY_ORDER;
 
     $SQL = str_replace('#WHERE#',$where <> '' ? " WHERE $where " : '',$RIDERS_SQL);
+
+	if (!isset($KEY_ORDER) || $KEY_ORDER == '') $KEY_ORDER = 'Rider_Name';
 
 	$SQL .= sql_order();
 
@@ -356,10 +358,33 @@ function show_rider_details_content($ride_data)
 	$res .= "<li><a href=\"#tab_notesdata\">Notes</a></li>";
 	$res .= "</ul></div>";
 	$res .= "<div class=\"tabContent\" id=\"tab_riderdata\"><br>";
-	$res .= "<label for=\"Rider_Name\" class=\"vlabel\">Rider name</label><input oninput=\"enableSave();\" type=\"text\" name=\"Rider_Name\" id=\"Rider_Name\" class=\"vdata\" $ro value=\"".$ride_data['Rider_Name']."\" >";
+
+	$res .= "<label for=\"Rider_Name\" class=\"vlabel\">Rider name</label><!--<input oninput=\"enableSave();\" type=\"text\" name=\"Rider_Name\" id=\"Rider_Name\" class=\"vdata\" $ro value=\"".$ride_data['Rider_Name']."\" >-->";
+
+	$res .= '<input oninput="enableSave();" type="text" id="Rider_name" name="Rider_First" class="vdata firstname" '.$ro.' value="'.$ride_data['Rider_First'].'"> ';
+	$res .= '<input oninput="enableSave();" type="text"  name="Rider_Last" class="vdata lastname" '.$ro.' value="'.$ride_data['Rider_Last'].'"> ';
+	
 	$res .= "<label for=\"IBA_Number\" class=\"vlabel\">IBA Number</label><input  oninput=\"enableSave();\" type=\"number\" name=\"IBA_Number\" id=\"IBA_Number\" class=\"vdata\" $ro value=\"".$ride_data['IBA_Number']."\" ><br />";
-	$res .= "<label for=\"Postal_Address\" class=\"vlabel\">Postal address</label><textarea  oninput=\"enableSave();\" name=\"Postal_Address\" id=\"Postal_Address\" class=\"vdata tall\" maxlength=\"255\" $ro>".$ride_data['Postal_Address']."</textarea><br />";
-	$res .= "<label for=\"Postcode\" class=\"vlabel\">Postcode</label><input  oninput=\"enableSave();\" type=\"text\" name=\"Postcode\" id=\"Postcode\" class=\"vdata short\" $ro maxlength=\"10\" value=\"".$ride_data['Postcode']."\" ><br />";
+
+	$res .= "<label for=\"Postal_Address\" class=\"vlabel\">Postal address</label><!--<textarea  oninput=\"enableSave();\" name=\"Postal_Address\" id=\"Postal_Address\" class=\"vdata tall\" maxlength=\"255\" $ro>".$ride_data['Postal_Address']."</textarea>--><br />";
+
+	$res .= '<fieldset class="AddressBlock">';
+	$res .= '<field><label for="Address1">1 of 2</label>';
+	$res .= '<input type="text" oninput="enableSave();" class="vdata" id="Address1" name="Address1"value="'.$ride_data['Address1'].'" '.$ro.'></field>';
+	$res .= '<field><label for="Address2">2 of 2</label>';
+	$res .= '<input type="text" class="vdata" oninput="enableSave();" id="Address2" name="Address2" value="'.$ride_data['Address2'].'" '.$ro.'></field>';
+	$res .= '<field><label for="Town">Town</label>';
+	$res .= '<input type="text" class="vdata" oninput="enableSave();" id="Town" name="Town" value="'.$ride_data['Town'].'" '.$ro.'></field>';
+	$res .= '<field><label for="County">County</label>';
+	$res .= '<input type="text" class="vdata" oninput="enableSave();" id="County" name="County" value="'.$ride_data['County'].'" '.$ro.'></field>';
+	
+	$res .= "<field><label for=\"Postcode\">Postcode</label><input  oninput=\"enableSave();\" type=\"text\" name=\"Postcode\" id=\"Postcode\" class=\"vdata short\" $ro maxlength=\"10\" value=\"".$ride_data['Postcode']."\" ></field>";	
+	
+	$res .= "<field><label for=\"Country\">Country</label>";
+	$res .= "<input  oninput=\"enableSave();\" type=\"text\" name=\"Country\" id=\"Country\" $ro class=\"vdata shorter\" value=\"".$ride_data['Country']."\" ></field>";
+
+	$res .= '</fieldset>';
+
 	$res .= "<br><label for=\"Email\" class=\"vlabel\">Email</label>";
 	$res .= "<input  oninput=\"enableSave();\" type=\"email\" name=\"Email\" id=\"Email\" class=\"vdata\" $ro maxlength=\"45\" value=\"".$ride_data['Email']."\" >";
 	$res .= "<a id=\"emailer\" title=\"Open your email client\" tabindex=\"-1\" id=\"sendMail\" href=\"mailto:".$ride_data['Email']."\"> $EMAIL_ICON</a><br>";
@@ -367,8 +392,6 @@ function show_rider_details_content($ride_data)
 	$res .= "<a tabindex=\"-1\" id=\"callPhone\"  href=\"tel:".$ride_data['Phone']."\"> $PHONE_ICON</a>";
 	$res .= "<label for=\"AltPhone\" class=\"vlabel\">AltPhone</label><input  title=\"Call number\" oninput=\"enableSave();\" type=\"tel\" name=\"AltPhone\" id=\"AltPhone\" class=\"vdata\" $ro maxlength=\"16\" value=\"".$ride_data['AltPhone']."\" >";
 	$res .= "<a tabindex=\"-1\" id=\"callAltPhone\"  href=\"tel:".$ride_data['AltPhone']."\"> $PHONE_ICON</a><br >";
-	$res .= "<br><label for=\"Country\" class=\"vlabel\">Country</label>";
-	$res .= "<input  oninput=\"enableSave();\" type=\"text\" name=\"Country\" id=\"Country\" $ro class=\"vdata shorter\" title=\"Used for reporting purposes, not part of address\" value=\"".$ride_data['Country']."\" ><br>";
 	$res .= "<br><fieldset><legend>Is normally a</legend>";
 	$res .= "<input type=\"radio\" name=\"IsPillion\"  oninput=\"enableSave();\" class=\"radio\" $ro value=\"N\" ".Checkbox_isNotChecked($ride_data['IsPillion'])."> Rider ";
 	$res .= " &nbsp;&nbsp; ";
@@ -720,8 +743,14 @@ function put_rider()
 	$OK = ($_SESSION['ACCESSLEVEL'] >= $GLOBALS['ACCESSLEVEL_UPDATE']);
 	
 	if (!$OK) safe_default_action();
+
+	$RiderName = $_POST['Rider_Last'].', '.$_POST['Rider_First'];
+	$PostalAddress = $_POST['Address1'];
+	if ($_POST['Address2'] != '') $PostalAddress .= "\n".$_POST['Address2'];
+	if ($_POST['Town'] != '') $PostalAddress .= "\n".$_POST['Town'];
+	if ($_POST['County'] != '') $PostalAddress .= "\n".$_POST['County'];
 	// Validation
-	if ($_POST['Rider_Name'] == '')
+	if ($RiderName == '')
 	{
 		show_infoline("Rider name may not be blank","errormsg");
 		show_rider_details_uri($_POST['riderid']);
@@ -769,10 +798,11 @@ function put_rider()
 	if ($newrec) {
 		$SQL = "INSERT INTO riders (";
 		$SQL .= "Rider_Name,IBA_Number,Postal_Address,Postcode,Phone,AltPhone,Email,IsPillion,Notes,Country,Deleted,CurrentMember,DateLastActive";
+		$SQL .= ",Rider_First,Rider_Last,Address1,Address2,Town,County";
 		$SQL .= ") VALUES (";
-		$SQL .= "'".safesql($_POST['Rider_Name'])."'";
+		$SQL .= "'".safesql($RiderName)."'";
 		$SQL .= ",'".safesql($_POST['IBA_Number'])."'";
-		$SQL .= ",'".safesql($_POST['Postal_Address'])."'";
+		$SQL .= ",'".safesql($PostalAddress)."'";
 		$SQL .= ",'".safesql($_POST['Postcode'])."'";
 		$SQL .= ",'".safesql($_POST['Phone'])."'";
 		$SQL .= ",'".safesql($_POST['AltPhone'])."'";
@@ -783,14 +813,21 @@ function put_rider()
 		$SQL .= ",'".safesql($_POST['IsDeleted'])."'";
 		$SQL .= ",'".safesql($_POST['IsCurrentMember'])."'";
 		$SQL .= ",".safedatesql($_POST['DateLastActive'])."";
+		$SQL .= ",'".safesql($_POST['Rider_First'])."'";
+		$SQL .= ",'".safesql($_POST['Rider_Last'])."'";
+		$SQL .= ",'".safesql($_POST['Address1'])."'";
+		$SQL .= ",'".safesql($_POST['Address2'])."'";
+		$SQL .= ",'".safesql($_POST['Town'])."'";
+		$SQL .= ",'".safesql($_POST['County'])."'";
+
 		$SQL .= ")";
 	} elseif (isset($_POST['deletethisrec'])) {
 		$SQL = "UPDATE riders SET Deleted='Y' WHERE riderid=".$_POST['riderid'];
 	} else {
 		$SQL = "UPDATE riders SET ";
-		$SQL .= "Rider_Name='".safesql($_POST['Rider_Name'])."'";
+		$SQL .= "Rider_Name='".safesql($RiderName)."'";
 		$SQL .= ",IBA_Number='".safesql($_POST['IBA_Number'])."'";
-		$SQL .= ",Postal_Address='".safesql($_POST['Postal_Address'])."'";
+		$SQL .= ",Postal_Address='".safesql($PostalAddress)."'";
 		$SQL .= ",Postcode='".safesql($_POST['Postcode'])."'";
 		$SQL .= ",Phone='".safesql($_POST['Phone'])."'";
 		$SQL .= ",AltPhone='".safesql($_POST['AltPhone'])."'";
@@ -801,6 +838,14 @@ function put_rider()
 		$SQL .= ",Deleted='".safesql($_POST['IsDeleted'])."'";
 		$SQL .= ",CurrentMember='".safesql($_POST['IsCurrentMember'])."'";
 		$SQL .= ",DateLastActive=".safedatesql($_POST['DateLastActive'])."";
+
+		$SQL .= ",Rider_First='".safesql($_POST['Rider_First'])."'";
+		$SQL .= ",Rider_Last='".safesql($_POST['Rider_Last'])."'";
+		$SQL .= ",Address1='".safesql($_POST['Address1'])."'";
+		$SQL .= ",Address2='".safesql($_POST['Address2'])."'";
+		$SQL .= ",Town='".safesql($_POST['Town'])."'";
+		$SQL .= ",County='".safesql($_POST['County'])."'";
+
 		$SQL .= " WHERE riderid=".$_POST['riderid'];
 	}
 

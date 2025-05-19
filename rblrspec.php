@@ -69,11 +69,11 @@ $IMPORTSPEC['cols']['pillionname'] = 2;
 $IMPORTSPEC['cols']['bike'] = 3;
 $IMPORTSPEC['cols']['miles'] = 5;
 $IMPORTSPEC['cols']['route'] = 10;
-$IMPORTSPEC['cols']['email'] = 11;
-$IMPORTSPEC['cols']['address'] = 12;
+$IMPORTSPEC['cols']['email'] = 12;
+$IMPORTSPEC['cols']['address'] = 15;
 $IMPORTSPEC['cols']['postcode'] = 13;
-$IMPORTSPEC['cols']['phone'] = 15;
-$IMPORTSPEC['cols']['mobile'] = 16;
+$IMPORTSPEC['cols']['phone'] = 11;
+//$IMPORTSPEC['cols']['mobile'] = 16;
 
 //$IMPORTSPEC['cols']['routes']['1001'] = 7;
 //$IMPORTSPEC['cols']['routes']['1002'] = 8;

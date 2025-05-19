@@ -81,8 +81,14 @@ function searchall($FIND,$ORDER,$DESC)
 		$SQL .= "(rides.NameOnCertificate LIKE '%$FIND%') ";
 		$SQL .= orRideDate($FIND);
 		if ($OK) $SQL .= "    OR (riders.Rider_Name LIKE '%$FIND%') ";
+		$nf = explode(' ',$FIND);
+		if ($OK && sizeof($nf) > 1) $SQL .= "    OR (riders.Rider_Name LIKE '%".$nf[1].', '.$nf[0]."%') ";
 		$SQL .= "    OR (riders.IBA_Number = '$FIND') ";
 		if ($OK) $SQL .= "    OR (riders.Postal_Address LIKE '%$FIND%') ";
+		if ($OK) $SQL .= "    OR (riders.Address1 LIKE '%$FIND%') ";
+		if ($OK) $SQL .= "    OR (riders.Address2 LIKE '%$FIND%') ";
+		if ($OK) $SQL .= "    OR (riders.Town LIKE '%$FIND%') ";
+		if ($OK) $SQL .= "    OR (riders.County LIKE '%$FIND%') ";
 		if ($OK) $SQL .= "    OR (riders.Postcode LIKE '%$FIND%') ";
 		if ($OK) $SQL .= "    OR (riders.Country LIKE '%$FIND%') ";
 		if ($OK) $SQL .= "    OR (riders.Email LIKE '%$FIND%') ";
